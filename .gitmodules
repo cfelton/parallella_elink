@@ -1,0 +1,3 @@
+[submodule "parallella_oh"]
+	path = parallella_oh
+	url = https://github.com/parallella/oh
