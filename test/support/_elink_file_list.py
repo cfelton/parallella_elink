@@ -11,7 +11,6 @@ from copy import copy
 # to parallalle_elink/test
 REF_DESIGN_DIR = '../parallella_oh'
 
-
 def create_cmdfile(cmdfile):
     """ create a new command file, basically replacing the paths
     """
@@ -22,7 +21,10 @@ def create_cmdfile(cmdfile):
             chunks = line.strip().split(' ')
             mhunks = copy(chunks)
             found = False if '-y' in chunks[0] else True
+
             for ii,cc in enumerate(chunks):
+                if len(cc) == 0:
+                    pass
                 if 'elink_tb' in cc:
                     found = False
                 elif os.path.isdir(os.path.join(root, cc)):
@@ -36,7 +38,7 @@ def create_cmdfile(cmdfile):
                     mhunks[ii] = newpath
                     found = True
 
-            if found:
+            if found and (len(chunks) > 0 and len(chunks[0]) > 0):
                 newfile.write(' '.join(mhunks) + '\n')
 
     return 

@@ -206,6 +206,5 @@ if __name__ == '__main__':
         dump_testbench=True,      # convert the stub (new testbench)
         )
 
-    parpath = '../../../parallella-hw'
-    refpath = os.path.join(parpath, 'fpga/src')
+    refpath = '../../parallella_oh'
     main(refpath, args)
