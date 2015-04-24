@@ -118,63 +118,72 @@ end
 
 m_elink_stub 
    dut(
-    elink_txrr_packet,
     elink_clkin,
     elink_hard_reset,
+    elink_clkbypass,
+    
+    
+    elink_chip_resetb,
+    elink_rowid,
+    elink_colid,
+    elink_mailbox_full,
+    elink_mailbox_not_empty,
+
+    elink_cclk_p,
+    elink_cclk_n,
+    
+    elink_rxrr_wait,
+    elink_txrd_wait,
+
+    elink_txrr_packet,
+    elink_rxwr_access,
+    elink_rxrd_wait,
+    elink_rxrr_access,
+    elink_txwr_clk,
+    
+    
+    elink_txwr_access,
+    elink_txrd_access,
+    elink_rxwr_clk,
+    elink_txrd_clk,
+    elink_rxrr_packet,    
+    elink_txrr_access,
+    elink_rxrd_clk,
+    elink_txrd_packet,
+    elink_rxrr_clk,
+    elink_rxwr_packet,
+    
+    
+    elink_txwr_wait,
+    elink_rxwr_wait,
+    elink_rxrd_packet,
+    elink_txrr_wait,
+    
+    elink_rxrd_access,
+    elink_txwr_packet,
+    elink_txrr_clk,
+    
+    elink_txo_lclk_p,
+    elink_txo_lclk_n,
+    elink_txo_data_n,
+    elink_txo_frame_n,
+    elink_txi_wr_wait_p,
+    elink_txi_wr_wait_n,
     elink_txi_rd_wait_p,
     elink_txi_rd_wait_n,
     elink_rxo_rd_wait_p,
     elink_rxo_rd_wait_n,
 
-    elink_chip_resetb,
-
-    elink_txo_lclk_p,
-    elink_txo_lclk_n,
-
-    elink_rxrr_wait,
-    elink_txrd_wait,
-    elink_txo_data_n,
-
-    elink_rxwr_access,
-    elink_cclk_p,
-    elink_rxrd_wait,
-    elink_cclk_n,
-    elink_rxrr_access,
-    elink_txwr_clk,
-    elink_rowid,
-    elink_txwr_access,
-    elink_colid,
-    elink_rxwr_clk,
-    elink_rxrr_packet,
-    elink_rxi_frame_n,
-    elink_rxi_data_n,
-    elink_txrr_access,
-    elink_rxrd_clk,
-    elink_txo_frame_n,
-    elink_txrd_packet,
-    elink_txi_wr_wait_p,
-    elink_txrd_clk,
-    elink_rxi_data_p,
-    elink_rxi_frame_p,
-    elink_txrd_access,
-    elink_rxrr_clk,
-    elink_rxwr_packet,
-    elink_mailbox_not_empty,
-    elink_txi_wr_wait_n,
-    elink_mailbox_full,
-    elink_txwr_wait,
     elink_txo_data_p,
     elink_txo_frame_p,
-    elink_rxwr_wait,
-    elink_rxrd_packet,
-    elink_rxi_lclk_p,
     elink_rxo_wr_wait_p,
-    elink_txrr_wait,
-    elink_clkbypass,
-    elink_rxrd_access,
-    elink_txwr_packet,
     elink_rxo_wr_wait_n,
-    elink_txrr_clk,
+    
+    elink_rxi_frame_n,
+    elink_rxi_data_n,    
+    elink_rxi_data_p,
+    elink_rxi_lclk_p,   
+    elink_rxi_frame_p,
     elink_rxi_lclk_n
 );
 
