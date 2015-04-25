@@ -17,11 +17,14 @@ class ELink(object):
     name = ''
 
     def __init__(self):
-        self.clkin = Signal(bool(0))       # clock into elink
-        self.colid = Signal(intbv(0)[4:])  # Ephiphany colid (from elink)
-        self.rowid = Signal(intbv(0)[4:])  # Ephiphany rowid (from elink)
-        self.cclk = Signal(bool(0))        # Ephiphany clock (from elink)
-        self.resetb = Signal(bool(0))      # Ephiphany reset (from elink)
+        self.clkin = Signal(bool(0))          # clock into elink
+        self.hard_reset = Signal(bool(0))     # active high-sync hardware reset
+        self.clkbypass = Signal(intbv(0)[2:]) # bypass clock for elink w/o pll
+        self.colid = Signal(intbv(0)[4:])     # Ephiphany colid (from elink)
+        self.rowid = Signal(intbv(0)[4:])     # Ephiphany rowid (from elink)
+        self.cclk = Signal(bool(0))           # Ephiphany clock (from elink)
+        self.resetb = Signal(bool(0))         # Ephiphany reset (from elink)
+
 
         # data in channel
         self.tx = ELinkChannel('tx')
@@ -39,10 +42,10 @@ class ELink(object):
         
         @always(delay(10000))
         def elink_cclk():
-            self.clkin.next = not self.clkin
-            
+            self.clkin.next = not self.clkin            
 
         return instances()
+
 
     def m_loopback(self):
 

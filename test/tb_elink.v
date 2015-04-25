@@ -157,6 +157,7 @@ module tb_elink;
     end
     
     // ELink design-under-test
+    defparam dut.ELINKID = 12'h800;
     elink 
       dut(
 	  .hard_reset        ( elink_hard_reset       ) ,	  

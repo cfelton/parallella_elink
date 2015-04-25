@@ -1,0 +1,33 @@
+[*]
+[*] GTKWave Analyzer v3.3.49 (w)1999-2013 BSI
+[*] Fri Apr 24 23:14:18 2015
+[*]
+[dumpfile] "/home/cfelton/Projects/parallella/parallella_elink_git/test/vcd/_tb_elink.vcd"
+[dumpfile_mtime] "Fri Apr 24 23:09:26 2015"
+[dumpfile_size] 5291
+[savefile] "/home/cfelton/Projects/parallella/parallella_elink_git/test/vcd/_tb_elink.gtkw"
+[timestart] 0
+[size] 1351 682
+[pos] -1 -1
+*-26.000000 10000002 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb_elink.
+[sst_width] 223
+[signals_width] 279
+[sst_expanded] 1
+[sst_vpaned_height] 178
+@28
+tb_elink.reset[0]
+tb_elink.clock[0]
+tb_elink.elink_clkin[0]
+tb_elink.elink_hard_reset[0]
+tb_elink.keep_alive[0]
+tb_elink.toggle[0]
+tb_elink.elink_chip_resetb[0]
+tb_elink.elink_cclk_p[0]
+tb_elink.elink_cclk_n[0]
+@22
+tb_elink.elink_rowid[3:0]
+@23
+tb_elink.elink_colid[3:0]
+[pattern_trace] 1
+[pattern_trace] 0

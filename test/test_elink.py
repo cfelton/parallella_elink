@@ -11,6 +11,7 @@ from argparse import Namespace
 from myhdl import *
 
 from elink import ELink
+from elink import EMesh
 from support import prep_cosim
 
 def run_testbench(args):
@@ -20,7 +21,9 @@ def run_testbench(args):
     keep_alive = Signal(bool(0))
 
     # Interface to the parallella/epiphany: elink
-    elink = ELink()
+    elink = ELink()       # interface between FPGA <-> Epiphany
+    emesh_ext = EMesh()   # ??
+    emesh_dv = EMesh()    # ??
 
     # Verilog reference design Cosimulation
     tbdutv = prep_cosim(clock, reset, keep_alive, elink, args=args)
@@ -38,10 +41,13 @@ def run_testbench(args):
 
         def pulse_reset():
             reset.next = reset.active
-            yield delay(1)
-            reset.next = reset.active
+            elink.hard_reset.next = False
+            yield elink.clkin.posedge
+            elink.hard_reset.next = True
+            yield elink.clkin.posedge
             yield delay(11113)
             reset.next = not reset.active
+            elink.hard_reset.next = False
             yield delay(100)
             yield clock.posedge
 
@@ -49,6 +55,7 @@ def run_testbench(args):
         @instance
         def tbstim():
             print("start simulation ...")
+            
             yield pulse_reset()
             
             for ii in range(100):
@@ -57,15 +64,18 @@ def run_testbench(args):
             print("end simulation")
             raise StopSimulation
 
-        toggle = Signal(bool(0))
+        toggle_when_cclk = Signal(bool(0))
+        toggle_when_alive = Signal(bool(0))
+
+        # test the auto-mapping
         cclk_p = elink.ports['elink_cclk_p']
         cclk_n = elink.ports['elink_cclk_n']
         @always(delay(1))
         def tbmon():
             if cclk_p and not cclk_n:
-                toggle.next = not toggle
-            elif keep_alive:
-                toggle.next = not toggle
+                toggle_when_cclk.next = not toggle_when_cclk
+            if keep_alive:
+                toggle_when_alive.next = not toggle_when_alive
 
         return tbclk, tbintf, tbloop, tbstim, tbmon
 
