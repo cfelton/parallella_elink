@@ -1,29 +1,29 @@
 [*]
-[*] GTKWave Analyzer v3.3.49 (w)1999-2013 BSI
-[*] Tue Apr 21 05:21:06 2015
+[*] GTKWave Analyzer v3.3.57 (w)1999-2014 BSI
+[*] Sat Apr 25 01:04:39 2015
 [*]
-[dumpfile] "/home/cfelton/Projects/parallella/parallella_elink/test/vcd/_test_elink.vcd"
-[dumpfile_mtime] "Tue Apr 21 05:17:46 2015"
-[dumpfile_size] 1226521
+[dumpfile] "/Users/cfelton/Projects/parallella/parallella_elink/test/vcd/_test_elink.vcd"
+[dumpfile_mtime] "Sat Apr 25 00:12:50 2015"
+[dumpfile_size] 1089908
 [optimize_vcd]
-[savefile] "/home/cfelton/Projects/parallella/parallella_elink/test/vcd/_test_elink.gtkw"
+[savefile] "/Users/cfelton/Projects/parallella/parallella_elink/test/vcd/_test_elink.gtkw"
 [timestart] 0
 [size] 1389 832
-[pos] -471 -255
-*-11.000000 1000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -1 -1
+*-16.000000 1000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] vcd/_test_elink.
 [sst_width] 223
-[signals_width] 120
+[signals_width] 234
 [sst_expanded] 1
-[sst_vpaned_height] 417
+[sst_vpaned_height] 445
 @28
 vcd/_test_elink.clock
 vcd/_test_elink.reset
-@29
-vcd/_test_elink.tbintf.self.cclk
-@28
 vcd/_test_elink.cclk_p
 vcd/_test_elink.cclk_n
-vcd/_test_elink.toggle
+vcd/_test_elink.keep_alive
+vcd/_test_elink.toggle_when_alive
+@29
+vcd/_test_elink.toggle_when_cclk
 [pattern_trace] 1
 [pattern_trace] 0

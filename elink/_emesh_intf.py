@@ -4,19 +4,9 @@ from __future__ import print_function
 
 from myhdl import *
 
-class EMesh(object):
-    def __init__(self, name, packet_width=104):
-        self.name = name
-        self.access = Signal(bool(0))
-        self.packet = Signal(intbv(0)[packet_width:])
-        self.wait = Signal(bool(0))
-
-    def monitor(self):
-        pass
-
 
 class EMesh(object):
-    def __init__(self, name, address_width=32, data_width=32):
+    def __init__(self, name='', address_width=32, data_width=32):
         self.name = name
         packet_width = address_width*2 + data_width + 8
         self.address_width = address_width
@@ -35,8 +25,10 @@ class EMesh(object):
         self.scraddr = Signal(intbv(0)[address_width:])
         self.clock = None
 
+
     def set_clock(self, clock):
         self.clock = clock
+
 
     def m_packet(self):
 
@@ -71,7 +63,7 @@ class EMesh(object):
         self.ctrlmode.next = 0
 
 
-    def g_reset(self):
+    def g_assert_reset(self):
         self.access.next = True
         self.write.next = True
         self.datamode.next = 2  
@@ -82,9 +74,57 @@ class EMesh(object):
         self._clear()
 
 
-    def g_set_clock(self, div=2):
+    def g_deassert_reset(self):
+        pass
+
+
+    def g_stop_clock(self):
+        pass
+
+
+    def g_start_clock(self):
+        pass
+
+
+    def g_set_clock(self, div=1):
         self.access.next = True
         self.write.next = True
         self.datamode.next = 2
         self.ctrlmode.next = 0
-        self.
+        self.dstaddr.next = 0x800E0004
+        divval = {1: 0x001, 2: 0x111, 4: 0x221, 8: 0x331, 16: 0x441, 
+                  32: 0x551, 64: 0x661}
+        self.data.next = divval[div]
+        yield self.clock.posedge
+        self._clear()
+
+
+    def g_nop(self):
+        self.access.next = True
+        self.write.next = True
+        self.datamode.next = 2
+        self.ctrlmode.next = 0
+        self.dstaddr.next = 0x80000000
+        yield self.clock.posedge
+        self._clear()
+
+
+    def g_enable(self, enable='both'):
+        """ tx, rx, or both """
+        pass
+
+
+    def g_write(self, addr, val):
+        pass
+
+    def g_read(self, src_addr, dst_addr):
+        self.access.next = True
+        self.write.next = False
+        self.datamode.next = 2
+        self.ctrlmode.next = 0
+        self.dstaddr.next = dst_addr
+        self.data.next = 0
+        self.srcaddr.next = src_addr
+        yield self.clock.posedge
+        self._clear()
+        
