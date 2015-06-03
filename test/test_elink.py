@@ -33,24 +33,22 @@ def run_testbench(args):
     def tbclk():
         clock.next = not clock
 
-    
     def _test():
 
         tbintf = elink.get_gens()
-        tbloop = elink.m_loopback()
+        tbloop = elink.loopback()
 
         def pulse_reset():
             reset.next = reset.active
-            elink.hard_reset.next = False
-            yield elink.clkin.posedge
-            elink.hard_reset.next = True
-            yield elink.clkin.posedge
+            elink.reset.next = False
+            yield elink.sys_clk.posedge
+            elink.reset.next = True
+            yield elink.sys_clk.posedge
             yield delay(11113)
             reset.next = not reset.active
-            elink.hard_reset.next = False
+            elink.reset.next = False
             yield delay(100)
             yield clock.posedge
-
 
         @instance
         def tbstim():
@@ -68,17 +66,17 @@ def run_testbench(args):
         toggle_when_alive = Signal(bool(0))
 
         # test the auto-mapping
-        cclk_p = elink.ports['elink_cclk_p']
-        cclk_n = elink.ports['elink_cclk_n']
+        #cclk_p = elink.ports['elink_cclk_p']
+        #cclk_n = elink.ports['elink_cclk_n']
+
         @always(delay(1))
         def tbmon():
-            if cclk_p and not cclk_n:
-                toggle_when_cclk.next = not toggle_when_cclk
+            #if cclk_p and not cclk_n:
+            #    toggle_when_cclk.next = not toggle_when_cclk
             if keep_alive:
                 toggle_when_alive.next = not toggle_when_alive
 
         return tbclk, tbintf, tbloop, tbstim, tbmon
-
 
     if args.trace:
         traceSignals.name = 'vcd/_test_elink'
@@ -110,5 +108,3 @@ def test_elink():
 
 if __name__ == '__main__':
     test_elink()
-
-        

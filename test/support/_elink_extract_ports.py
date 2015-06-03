@@ -151,11 +151,11 @@ def m_elink_stub(elink):
     keepd = Signal(intbv(0)[64:])
     keepr = Signal(intbv(0)[64:])
 
-    @always(elink.clkin.posedge)
+    @always(elink.sys_clk.posedge)
     def rtlin():
         keepd.next = 1
             
-    @always(elink.clkin.posedge)    
+    @always(elink.sys_clk.posedge)    
     def rtlout():
         keepr.next = keepd
 
