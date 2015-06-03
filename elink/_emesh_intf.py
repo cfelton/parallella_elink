@@ -25,10 +25,8 @@ class EMesh(object):
         self.scraddr = Signal(intbv(0)[address_width:])
         self.clock = None
 
-
     def set_clock(self, clock):
         self.clock = clock
-
 
     def m_packet(self):
 
@@ -50,18 +48,15 @@ class EMesh(object):
             self.packet.next[aw+b:b] = self.srcaddr
 
         return assign_packet
-                           
 
     def m_monitor(self):
         pass
 
-    
     def _clear(self):
         self.access.next = False
         self.write.next = False
         self.datamode.next = 0
         self.ctrlmode.next = 0
-
 
     def g_assert_reset(self):
         self.access.next = True
@@ -73,18 +68,14 @@ class EMesh(object):
         yield self.clock.posedge
         self._clear()
 
-
     def g_deassert_reset(self):
         pass
-
 
     def g_stop_clock(self):
         pass
 
-
     def g_start_clock(self):
         pass
-
 
     def g_set_clock(self, div=1):
         self.access.next = True
@@ -98,7 +89,6 @@ class EMesh(object):
         yield self.clock.posedge
         self._clear()
 
-
     def g_nop(self):
         self.access.next = True
         self.write.next = True
@@ -108,11 +98,9 @@ class EMesh(object):
         yield self.clock.posedge
         self._clear()
 
-
     def g_enable(self, enable='both'):
         """ tx, rx, or both """
         pass
-
 
     def g_write(self, addr, val):
         pass
@@ -127,4 +115,3 @@ class EMesh(object):
         self.srcaddr.next = src_addr
         yield self.clock.posedge
         self._clear()
-        

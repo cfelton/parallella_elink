@@ -116,7 +116,7 @@ module tb_elink
 		  );
     end
 
-    m_elink_stub 
+    elink
       dut(
 	  elink_clkin,
 	  elink_hard_reset,

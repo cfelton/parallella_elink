@@ -6,10 +6,12 @@ import os
 import shlex
 import subprocess
 import pickle
+from argparse import Namespace
 
 from myhdl import *
 from _elink_file_list import get_reference_design_file_list
 from _elink_map_ports import elink_map_ports
+
 
 def prep_cosim(clock, reset, keep_alive, elink, args=None):
     """
@@ -17,7 +19,7 @@ def prep_cosim(clock, reset, keep_alive, elink, args=None):
     
     print("Checking reference design and building")
     # the following creates the command file with the correct
-    # path, the returns are not used by this function
+    # path.  The returns are not used by this function.
     vfiles, etop, cmdfile = get_reference_design_file_list()
 
     # this recompiles everything again ... there is a better way to
@@ -41,16 +43,14 @@ def prep_cosim(clock, reset, keep_alive, elink, args=None):
     cmd = "vvp -m ./myhdl.vpi elink {}".format(dstr)
 
     # the top-level ports were automatically extracted from 
-    # the Verilog elink.v.
+    # the Verilog elink.v (support._elink_extract_ports.main)
     ports = pickle.load(open('support/elink_ports.pkl', 'r'))
-    # references the signals in the interface
+
+    # references the signals in the interface ...
     gmap = elink_map_ports(ports, elink)  
     elink_ports = elink.ports
 
-    with open('elink_ports.txt', 'w') as fp:
-        for pn, ps in elink_ports.iteritems():
-            fp.write("{:28}: {} \n".format(pn, repr(ps)))
-
+    # create the cosim generator to be passed to the MyHDL simulator
     gcosim = Cosimulation(
         cmd,
         # global clock can reset, these don't exist in the elink DUT

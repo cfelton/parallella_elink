@@ -38,34 +38,34 @@ def _search_signals(name, stype, intf):
 
 
 def elink_map_ports(ports, elink):
-    ''' Map the extracted raw IO (top-level ports).
+    """ Map the extracted raw IO (top-level ports).
     This function will map the extrated top-level IO (ports) from 
     the reference Verilog to the ELink interface
-    '''
+    """
     portmap = {}
     eports = {}
 
-    for name, stype in ports.iteritems():
-                
-        sig = None
-        mm = 'none'
-        
-        if not ('_n' in name[-2:]):
-            # @todo: add AXI Master and AXI Slave
-            for intf in (elink, elink.tx, elink.rx,):
-                sig, mm = _search_signals(name, stype, intf)
-                if sig is not None:
-                    break
-
-        # if the signal was found above create a reference to it
-        # if not create a stub signal
-        if sig is None:
-            sig = Signal(stype)
+    with open('elink_ports.txt', 'w') as fp:
+        for name, stype in ports.iteritems():
+                    
+            sig = None
+            mm = 'none'
             
-        eports[name] = sig
-        portmap[name] = mm
-        print("{} --> {} ".format(name, mm))
-
+            if not ('_n' in name[-2:]):
+                # @todo: add AXI Master and AXI Slave
+                for intf in (elink, elink.tx, elink.rx,):
+                    sig, mm = _search_signals(name, stype, intf)
+                    if sig is not None:
+                        break
+        
+            # if the signal was found above create a reference to it
+            # if not create a stub signal
+            if sig is None:
+                sig = Signal(stype)
+                
+            eports[name] = sig
+            portmap[name] = mm
+            fp.write("{:28}: {:20} --> {}\n".format(name, repr(sig), mm))
 
     # attach the ports to the elink interface
     elink.ports = eports

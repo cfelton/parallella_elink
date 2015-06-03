@@ -157,25 +157,45 @@ module tb_elink;
     end
     
     // ELink design-under-test
-    defparam dut.ELINKID = 12'h800;
+    //defparam dut.ELINKID = 12'h800;
+    defparam dut.ID = 12'h800;  // set to 810 as default
     elink 
       dut(
-	  .hard_reset        ( elink_hard_reset       ) ,	  
-          .clkin             ( elink_clkin            ) ,
-	  .clkbypass         ( elink_clkbypass        ) ,
+	  // man.o.man they are chaning this interface way too often
+	  // why is it not set by now
+	  //.hard_reset        ( elink_hard_reset       ) ,	  
+          //.clkin             ( elink_clkin            ) ,
+	  //.clkbypass         ( elink_clkbypass        ) ,
       
-	  .rowid             ( elink_rowid            ) ,
-	  .colid             ( elink_colid            ) ,	  
-	  .chip_resetb       ( elink_chip_resetb      ) ,
-          .cclk_p            ( elink_cclk_p           ) ,
-	  .cclk_n            ( elink_cclk_n           ) ,
-      
+	  //.rowid             ( elink_rowid            ) ,
+	  //.colid             ( elink_colid            ) ,	  
+	  //.chip_resetb       ( elink_chip_resetb      ) ,
+          //.cclk_p            ( elink_cclk_p           ) ,
+	  //.cclk_n            ( elink_cclk_n           ) ,
+
+	  // clocks and resets
+	  .reset             ( elink_chip_resetb      ), // por reset
+	  .sys_clk           ( elink_clkin            ), // system clock for FIFOs only
+	  .tx_lclk           ( ), // fast tx clock for IO
+	  .tx_lclk90         ( ), // fast 90deg shifted lclk
+	  .tx_lclk_div4      ( ), // slow tx clock for core logic
+	  .rx_lclk           ( ), // rx input clock tweaked by pll for IO
+	  .rx_lclk_div4      ( ), // slow rx clock for core logic
+	  .rx_ref_clk        ( ), // 200MHz ref clock for idelay
+	  .rx_lclk_pll       ( ), // rx_lclk input for pll
+	  
+	  // EPIPHANY interface I/O
+	  .chipid            ( ), // chip id strap pins
+	  .elink_en          ( ), // elink/ephiphany master enable 
+	  
+	  // ELINK I/O pins
 	  .rxi_lclk_p        ( elink_rxi_lclk_p       ) ,	  
 	  .rxi_lclk_n        ( elink_rxi_lclk_n       ) ,
 	  .rxi_data_n        ( elink_rxi_data_n       ) ,
 	  .rxi_data_p        ( elink_rxi_data_p       ) ,
 	  .rxi_frame_p       ( elink_rxi_frame_p      ) ,
 	  .rxi_frame_n       ( elink_rxi_frame_n      ) ,
+	  
 	  .rxo_wr_wait_p     ( elink_rxo_wr_wait_p    ) ,
 	  .rxo_wr_wait_n     ( elink_rxo_wr_wait_n    ) ,	  
 	  .rxo_rd_wait_p     ( elink_rxo_rd_wait_p    ) ,
@@ -186,47 +206,48 @@ module tb_elink;
 	  .txo_data_p        ( elink_txo_data_p       ) ,
 	  .txo_data_n        ( elink_txo_data_n       ) ,
 	  .txo_frame_n       ( elink_txo_frame_n      ) ,
-	  .txo_frame_p       ( elink_txo_frame_p      ) ,
-      
+	  .txo_frame_p       ( elink_txo_frame_p      ) ,      
       
 	  .txi_wr_wait_p     ( elink_txi_wr_wait_p    ) ,
 	  .txi_wr_wait_n     ( elink_txi_wr_wait_n    ) ,
 	  .txi_rd_wait_p     ( elink_txi_rd_wait_p    ) ,
 	  .txi_rd_wait_n     ( elink_txi_rd_wait_n    ) ,
 
-          .mailbox_full      ( elink_embox_full       ) ,
-	  .mailbox_not_empty ( elink_embox_not_empty  ) ,	  
-
-          .rxwr_clk          ( elink_rxwr_clk         ) ,	  
+	  // System Interface
+          //.rxwr_clk          ( elink_rxwr_clk         ) ,	  
 	  .rxwr_access       ( elink_rxwr_access      ) ,
           .rxwr_packet       ( elink_rxwr_packet      ) ,  
           .rxwr_wait         ( elink_rxwr_wait        ) ,
 
-          .rxrd_clk          ( elink_rxrd_clk         ) ,	  
+          //.rxrd_clk          ( elink_rxrd_clk         ) ,	  
           .rxrd_access       ( elink_rxrd_access      ) ,
           .rxrd_packet       ( elink_rxrd_packet      ) ,
 	  .rxrd_wait         ( elink_rxrd_wait        ) ,
 
-          .rxrr_clk          ( elink_rxrr_clk         ) ,
+          //.rxrr_clk          ( elink_rxrr_clk         ) ,
 	  .rxrr_access       ( elink_rxrr_access      ) ,
           .rxrr_packet       ( elink_rxrr_packet      ) ,     	  
           .rxrr_wait         ( elink_rxrr_wait        ) ,	  	   		     
 
-	  .txwr_clk          ( elink_txwr_clk         ) ,	            
+	  //.txwr_clk          ( elink_txwr_clk         ) ,	            
           .txwr_access       ( elink_txwr_access      ) ,
           .txwr_packet       ( elink_txwr_packet      ) ,
           .txwr_wait         ( elink_txwr_wait        ) ,
 
 
-	  .txrd_clk          ( elink_txrd_clk         ) ,
+	  //.txrd_clk          ( elink_txrd_clk         ) ,
           .txrd_access       ( elink_txrd_access      ) ,
           .txrd_packet       ( elink_txrd_packet      ) ,	  
 	  .txrd_wait         ( elink_txrd_wait        ) ,
 
-	  .txrr_clk          ( elink_txrr_clk         ) ,	  	  	  
+	  //.txrr_clk          ( elink_txrr_clk         ) ,	  	  	  
           .txrr_access       ( elink_txrr_access      ) ,	  		     
 	  .txrr_packet       ( elink_txrr_packet      ) ,	 
-          .txrr_wait         ( elink_txrr_wait        ) 	  		               		     			  	            
+          .txrr_wait         ( elink_txrr_wait        ) ,
+
+	  .mailbox_full      ( elink_embox_full       ) ,
+	  .mailbox_not_empty ( elink_embox_not_empty  ) ,
+	  .timeout           ( )
 	  );
 
 endmodule
