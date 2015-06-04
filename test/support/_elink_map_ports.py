@@ -82,6 +82,9 @@ def elink_map_ports(ports, elink):
             if sig is None:
                 sig = Signal(stype)
                 
+            if eports.has_key(name):
+                raise StandardError('')
+
             eports[name] = sig
             portmap[name] = mm
             fp.write("{:28}: {:20} --> {}\n".format(name, repr(sig), mm))
