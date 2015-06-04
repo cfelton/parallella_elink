@@ -12,34 +12,59 @@
 
 module tb_elink;
 
+    // manually added signals
     reg clock;
     reg reset;
     reg keep_alive;
+
+    // auto-generated from extract ports (since been modified)
+
+    // removed in the latest `oh` updates
+    //reg 	 elink_clkin;    
+    //wire [3:0] 	elink_rowid;
+    //wire [3:0] 	elink_colid;
+    //reg 	 elink_hard_reset;
+    //wire 	elink_chip_resetb;
+    //reg [2:0] 	 elink_clkbypass;
+    //reg 	elink_txrr_clk;
+    //reg 	elink_txwr_clk;
+    //reg elink_rxwr_clk;
+    //wire 	elink_cclk_n;
+    //wire 	elink_cclk_p;
+    //reg 	 elink_rxrd_clk;
+    
+    // added in the latest `oh` updates
+    //reg sys_clk  // using clock
+    //reg reset    // using reset
+
+    reg elink_tx_lclk;
+    reg elink_tx_lclk90;
+    reg elink_tx_lclk_div4;
+    
     
     reg [103:0] elink_txrr_packet;
     wire 	elink_txo_lclk_p;
-    wire 	elink_chip_resetb;
+
     reg 	elink_rxrr_wait;
     wire 	elink_txrd_wait;
     wire 	elink_rxwr_access;
-    wire 	elink_cclk_p;
+
     reg 	elink_rxrd_wait;
-    wire 	elink_cclk_n;
+
     wire 	elink_rxrr_access;
-    reg 	elink_txwr_clk;
-    wire [3:0] 	elink_rowid;
+
+
+    
     reg 	elink_txwr_access;
-    wire [3:0] 	elink_colid;
     wire 	elink_txo_lclk_n;
-    reg 	elink_rxwr_clk;
     wire [103:0] elink_rxrr_packet;
     reg 	 elink_rxi_frame_n;
     reg [7:0] 	 elink_rxi_data_n;
-    reg 	 elink_clkin;
+
     reg 	 elink_txrr_access;
-    reg 	 elink_hard_reset;
+
     reg 	 elink_txi_rd_wait_p;
-    reg 	 elink_rxrd_clk;
+
     wire 	 elink_txo_frame_n;
     reg [103:0]  elink_txrd_packet;
     reg 	 elink_txi_rd_wait_n;
@@ -64,11 +89,11 @@ module tb_elink;
     reg 	 elink_rxi_lclk_p;
     wire 	 elink_rxo_wr_wait_p;
     wire 	 elink_txrr_wait;
-    reg [2:0] 	 elink_clkbypass;
+
     wire 	 elink_rxrd_access;
     reg [103:0]  elink_txwr_packet;
     wire 	 elink_rxo_wr_wait_n;
-    reg 	 elink_txrr_clk;
+
     reg 	 elink_rxi_lclk_n;
 
 
@@ -175,8 +200,8 @@ module tb_elink;
 	  //.cclk_n            ( elink_cclk_n           ) ,
 
 	  // clocks and resets
-	  .reset             ( elink_chip_resetb      ), // por reset
-	  .sys_clk           ( elink_clkin            ), // system clock for FIFOs only
+	  .reset             ( reset                  ), // por reset
+	  .sys_clk           ( clock                  ), // system clock for FIFOs only
 	  .tx_lclk           ( ), // fast tx clock for IO
 	  .tx_lclk90         ( ), // fast 90deg shifted lclk
 	  .tx_lclk_div4      ( ), // slow tx clock for core logic
@@ -184,11 +209,11 @@ module tb_elink;
 	  .rx_lclk_div4      ( ), // slow rx clock for core logic
 	  .rx_ref_clk        ( ), // 200MHz ref clock for idelay
 	  .rx_lclk_pll       ( ), // rx_lclk input for pll
-	  
+      
 	  // EPIPHANY interface I/O
 	  .chipid            ( ), // chip id strap pins
 	  .elink_en          ( ), // elink/ephiphany master enable 
-	  
+      
 	  // ELINK I/O pins
 	  .rxi_lclk_p        ( elink_rxi_lclk_p       ) ,	  
 	  .rxi_lclk_n        ( elink_rxi_lclk_n       ) ,
@@ -196,7 +221,7 @@ module tb_elink;
 	  .rxi_data_p        ( elink_rxi_data_p       ) ,
 	  .rxi_frame_p       ( elink_rxi_frame_p      ) ,
 	  .rxi_frame_n       ( elink_rxi_frame_n      ) ,
-	  
+      
 	  .rxo_wr_wait_p     ( elink_rxo_wr_wait_p    ) ,
 	  .rxo_wr_wait_n     ( elink_rxo_wr_wait_n    ) ,	  
 	  .rxo_rd_wait_p     ( elink_rxo_rd_wait_p    ) ,
