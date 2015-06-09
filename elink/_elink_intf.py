@@ -25,23 +25,8 @@ class ELink(object):
     def __init__(self):
         # as of 03-Jun-2015 the elink interface has been changing quite
         # a bit.  Hopefully the following is close to the final ...
-        self.reset = Signal(bool(0))          # POR reset
-        self.sys_clk = Signal(bool(0))        # system clock for FIFOs only
-        #self.tx_lclk = Signal(bool(0))        # fast TX clock for IO
-        #self.tx_lclk90 = Signal(bool(0))      # fast 90deg shifted lclk
-        #self.tx_lclk_div4 = Signal(bool(0))   # slow tx clock for core logic
-        #self.rx_lclk = Signal(bool(0))        # RX input clock tweaked by PLL for IO
-        #self.rx_lclk_div4 = Signal(bool(0))   # slow RX clock for core logic
-        #self.rx_ref_clk = Signal(bool(0))     # 200MHz ref clock for idelay
-        #self.rx_lclk_pll = Signal(bool(0))    # rx_lclk input for PLL (output)
-
-        # previous (old) interface
-        #self.clkin = Signal(bool(0))          # clock into elink
-        #self.hard_reset = Signal(bool(0))     # active high-sync hardware reset
-        #self.clkbypass = Signal(intbv(0)[2:]) # bypass clock for elink w/o pll
-        #self.cclk = Signal(bool(0))           # Ephiphany clock (from elink)
-        #self.resetb = Signal(bool(0))         # Ephiphany reset (from elink)
-
+        self.reset = Signal(bool(0))     # POR reset
+        self.sys_clk = Signal(bool(0))   # system clock for FIFOs only
 
         # data in channel
         self.tx = ELinkChannel('tx')
