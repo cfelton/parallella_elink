@@ -6,8 +6,23 @@ from myhdl import *
 
 
 class EMesh(object):
+    """
+     PACKET FIELD  | BITS    | DESCRIPTION
+    --------------|---------|----------
+    access        | [0]     | Indicates a valid transaction
+    write         | [1]     | Indicates a write transaction
+    datamode[1:0] | [3:2]   | Datasize (00=8b,01=16b,10=32b,11=64b)
+    ctrlmode[3:0] | [7:4]   | Various special modes for the Epiphany chip
+    dstraddr[31:0]| [39:8]  | Address for write, read-request, or
+                              read-responses
+    data[31:0]    | [71:40] | Data for write transaction, data for
+                              read response
+    srcaddr[31:0] | [103:72]| Return address for read-request, upper
+                              data for write
+    """
     def __init__(self, name='', address_width=32, data_width=32):
         self.name = name
+
         packet_width = address_width*2 + data_width + 8
         self.address_width = address_width
         self.data_width = data_width
@@ -34,8 +49,9 @@ class EMesh(object):
         dw = self.data_width
         pw = self.packet_width
 
+        # create the
         @always_comb
-        def assign_pakcet():
+        def assign_packet():
             self.packet.next[0] = self.access
             self.packet.next[1] = self.write
             self.packet.next[4:2] = self.datamode
@@ -102,16 +118,24 @@ class EMesh(object):
         """ tx, rx, or both """
         pass
 
-    def g_write(self, addr, val):
-        pass
+    def g_write(self, srcaddr, dstaddr, val):
+        self.access.next = True
+        self.write.next = True
+        self.datamode.next = 2
+        self.ctrlmode.next = 0
+        self.dstaddr.next = dstaddr
+        self.data.next = val
+        self.srcaddr.next = srcaddr
+        yield self.clock.posedge
+        set._clear()
 
-    def g_read(self, src_addr, dst_addr):
+    def g_read(self, srcaddr, dstaddr):
         self.access.next = True
         self.write.next = False
         self.datamode.next = 2
         self.ctrlmode.next = 0
-        self.dstaddr.next = dst_addr
+        self.dstaddr.next = dstaddr
         self.data.next = 0
-        self.srcaddr.next = src_addr
+        self.srcaddr.next = srcaddr
         yield self.clock.posedge
         self._clear()
