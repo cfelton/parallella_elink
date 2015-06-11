@@ -1,29 +1,38 @@
 [*]
 [*] GTKWave Analyzer v3.3.57 (w)1999-2014 BSI
-[*] Sat Apr 25 01:04:39 2015
+[*] Thu Jun  4 13:47:36 2015
 [*]
 [dumpfile] "/Users/cfelton/Projects/parallella/parallella_elink/test/vcd/_test_elink.vcd"
-[dumpfile_mtime] "Sat Apr 25 00:12:50 2015"
-[dumpfile_size] 1089908
+[dumpfile_mtime] "Thu Jun  4 13:28:12 2015"
+[dumpfile_size] 1410559
 [optimize_vcd]
 [savefile] "/Users/cfelton/Projects/parallella/parallella_elink/test/vcd/_test_elink.gtkw"
 [timestart] 0
-[size] 1389 832
+[size] 1832 708
 [pos] -1 -1
 *-16.000000 1000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] vcd/_test_elink.
+[treeopen] vcd/_test_elink.tbintf.
 [sst_width] 223
-[signals_width] 234
+[signals_width] 308
 [sst_expanded] 1
-[sst_vpaned_height] 445
+[sst_vpaned_height] 323
 @28
 vcd/_test_elink.clock
 vcd/_test_elink.reset
-vcd/_test_elink.cclk_p
-vcd/_test_elink.cclk_n
 vcd/_test_elink.keep_alive
 vcd/_test_elink.toggle_when_alive
-@29
 vcd/_test_elink.toggle_when_cclk
+@200
+-
+@28
+vcd/_test_elink.tbintf.gclk.self_sys_clk
+vcd/_test_elink.tbintf.gclk.self_rx_lclk_div4
+@29
+vcd/_test_elink.tbintf.gclk.self_rx_renamed1_lclk
+@28
+vcd/_test_elink.tbintf.gclk.self_tx_lclk_div4
+vcd/_test_elink.tbintf.gclk.self_tx_renamed1_lclk
+vcd/_test_elink.tbintf.gclk.self_tx_renamed3_lclk90
 [pattern_trace] 1
 [pattern_trace] 0

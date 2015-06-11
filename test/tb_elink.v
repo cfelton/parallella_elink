@@ -18,83 +18,70 @@ module tb_elink;
     reg keep_alive;
 
     // auto-generated from extract ports (since been modified)
-
-    // removed in the latest `oh` updates
-    //reg 	 elink_clkin;    
-    //wire [3:0] 	elink_rowid;
-    //wire [3:0] 	elink_colid;
-    //reg 	 elink_hard_reset;
-    //wire 	elink_chip_resetb;
-    //reg [2:0] 	 elink_clkbypass;
-    //reg 	elink_txrr_clk;
-    //reg 	elink_txwr_clk;
-    //reg elink_rxwr_clk;
-    //wire 	elink_cclk_n;
-    //wire 	elink_cclk_p;
-    //reg 	 elink_rxrd_clk;
+    reg          elink_reset;       
+    reg 	 elink_sys_clk;
+    reg 	 elink_tx_lclk;
+    reg 	 elink_tx_lclk90;
+    reg 	 elink_tx_lclk_div4;
+    reg 	 elink_rx_lclk;
+    reg 	 elink_rx_lclk_div4;
+    reg 	 elink_rx_ref_clk;
+    wire   	 elink_rx_lclk_pll;       
+    wire 	 elink_en;
+    wire [11:0]  elink_chipid;
     
-    // added in the latest `oh` updates
-    //reg sys_clk  // using clock
-    //reg reset    // using reset
-
-    reg elink_tx_lclk;
-    reg elink_tx_lclk90;
-    reg elink_tx_lclk_div4;
-    
-    
-    reg [103:0] elink_txrr_packet;
-    wire 	elink_txo_lclk_p;
-
-    reg 	elink_rxrr_wait;
-    wire 	elink_txrd_wait;
-    wire 	elink_rxwr_access;
-
-    reg 	elink_rxrd_wait;
-
-    wire 	elink_rxrr_access;
-
-
-    
-    reg 	elink_txwr_access;
-    wire 	elink_txo_lclk_n;
-    wire [103:0] elink_rxrr_packet;
-    reg 	 elink_rxi_frame_n;
-    reg [7:0] 	 elink_rxi_data_n;
-
-    reg 	 elink_txrr_access;
-
-    reg 	 elink_txi_rd_wait_p;
-
-    wire 	 elink_txo_frame_n;
-    reg [103:0]  elink_txrd_packet;
-    reg 	 elink_txi_rd_wait_n;
-    reg 	 elink_txi_wr_wait_p;
-    reg 	 elink_txrd_clk;
-    reg [7:0] 	 elink_rxi_data_p;
-    reg 	 elink_rxi_frame_p;
-    wire [7:0] 	 elink_txo_data_n;
-    reg 	 elink_txrd_access;
-    wire 	 elink_rxo_rd_wait_p;
-    reg 	 elink_rxrr_clk;
-    wire [103:0] elink_rxwr_packet;
-    wire 	 elink_rxo_rd_wait_n;
-    wire 	 elink_mailbox_not_empty;
-    reg 	 elink_txi_wr_wait_n;
-    wire 	 elink_mailbox_full;
-    wire 	 elink_txwr_wait;
-    wire [7:0] 	 elink_txo_data_p;
-    wire 	 elink_txo_frame_p;
-    reg 	 elink_rxwr_wait;
-    wire [103:0] elink_rxrd_packet;
     reg 	 elink_rxi_lclk_p;
+    reg 	 elink_rxi_lclk_n;
+    reg [7:0] 	 elink_rxi_data_p;
+    reg [7:0] 	 elink_rxi_data_n;
+    reg 	 elink_rxi_frame_p;
+    reg 	 elink_rxi_frame_n;
+
     wire 	 elink_rxo_wr_wait_p;
-    wire 	 elink_txrr_wait;
+    wire 	 elink_rxo_wr_wait_n;
+    wire 	 elink_rxo_rd_wait_p;
+    wire 	 elink_rxo_rd_wait_n;
+
+    wire 	 elink_txo_lclk_p;
+    wire 	 elink_txo_lclk_n;
+    wire [7:0] 	 elink_txo_data_p;
+    wire [7:0] 	 elink_txo_data_n;
+    wire 	 elink_txo_frame_p;
+    wire 	 elink_txo_frame_n;
+
+    reg 	 elink_txi_wr_wait_p;
+    reg 	 elink_txi_wr_wait_n;
+    reg 	 elink_txi_rd_wait_p;
+    reg 	 elink_txi_rd_wait_n;
+
+
+    wire 	 elink_rxwr_access;
+    wire [103:0] elink_rxwr_packet;
+    reg 	 elink_rxwr_wait;
 
     wire 	 elink_rxrd_access;
-    reg [103:0]  elink_txwr_packet;
-    wire 	 elink_rxo_wr_wait_n;
+    wire [103:0] elink_rxrd_packet;
+    reg 	 elink_rxrd_wait;
 
-    reg 	 elink_rxi_lclk_n;
+    wire 	 elink_rxrr_access;
+    wire [103:0] elink_rxrr_packet;
+    reg 	 elink_rxrr_wait;
+
+    reg 	 elink_txwr_access;
+    reg [103:0]  elink_txwr_packet;
+    wire 	 elink_txwr_wait;
+
+    reg 	 elink_txrd_access;
+    reg [103:0]  elink_txrd_packet;
+    wire 	 elink_txrd_wait;
+
+    reg 	 elink_txrr_access;
+    reg [103:0]  elink_txrr_packet;
+    wire 	 elink_txrr_wait;
+
+    wire 	 elink_mailbox_full;
+    wire 	 elink_mailbox_not_empty;
+    wire         elink_timeout;
 
 
 `ifdef VTRACE		
@@ -110,66 +97,80 @@ module tb_elink;
 	  (
 	   clock,
 	   reset,
+
+	   elink_reset,
+	   elink_sys_clk,
+	   elink_tx_lclk,
+	   elink_tx_lclk90,
+	   elink_tx_lclk_div4,
+	   elink_rx_lclk,
+	   elink_rx_lclk_div4,
+	   elink_rx_ref_clk,
+
+           elink_txwr_access,
+           elink_txwr_packet,
+
+           elink_txrd_access,
+           elink_txrd_packet,
+
+           elink_txrr_access,
 	   elink_txrr_packet,
            elink_rxrr_wait,
+
            elink_rxrd_wait,
-           //elink_txwr_clk,
-           elink_txwr_access,
-           //elink_rxwr_clk,
-           elink_rxi_frame_n,
-           elink_rxi_data_n,
-           //elink_clkin,
-           elink_txrr_access,
-           //elink_hard_reset,
-           elink_txi_rd_wait_p,
-           //elink_rxrd_clk,
-           elink_txrd_packet,
-           elink_txi_rd_wait_n,
-           elink_txi_wr_wait_p,
-           //elink_txrd_clk,
-           elink_rxi_data_p,
-           elink_rxi_frame_p,
-           elink_txrd_access,
-           //elink_rxrr_clk,
-           elink_txi_wr_wait_n,
-           elink_rxwr_wait,
+
+	   elink_rxwr_wait,
+
            elink_rxi_lclk_p,
-           //elink_clkbypass,
-           elink_txwr_packet,
-           //elink_txrr_clk,
-           elink_rxi_lclk_n
+           elink_rxi_lclk_n,
+           elink_rxi_data_p,
+           elink_rxi_data_n,
+           elink_rxi_frame_p,
+           elink_rxi_frame_n,
+
+           elink_txi_wr_wait_p,
+           elink_txi_wr_wait_n,
+           elink_txi_rd_wait_p,
+           elink_txi_rd_wait_n
 	   );
+
+
 	$to_myhdl
 	  (
 	   keep_alive,
+
+	   elink_rx_lclk_pll,
+
 	   elink_txo_lclk_p,
-           //elink_chip_resetb,
-           elink_txrd_wait,
-           elink_rxwr_access,
-           //elink_cclk_p,
-           //elink_cclk_n,
-           elink_rxrr_access,
-           //elink_rowid,
-           //elink_colid,
            elink_txo_lclk_n,
-           elink_rxrr_packet,
-           elink_txo_frame_n,
-           elink_txo_data_n,
-           elink_rxo_rd_wait_p,
-           elink_rxwr_packet,
-           elink_rxo_rd_wait_n,
-           elink_mailbox_not_empty,
-           elink_mailbox_full,
-           elink_txwr_wait,
            elink_txo_data_p,
+           elink_txo_data_n,
            elink_txo_frame_p,
-           elink_rxrd_packet,
+           elink_txo_frame_n,
+
            elink_rxo_wr_wait_p,
-           elink_txrr_wait,
+           elink_rxo_wr_wait_n,
+           elink_rxo_rd_wait_p,
+           elink_rxo_rd_wait_n,
+
+           elink_rxwr_access,
+           elink_rxwr_packet,
+
            elink_rxrd_access,
-           elink_rxo_wr_wait_n
+           elink_rxrd_packet,
+
+           elink_rxrr_access,
+           elink_rxrr_packet,
+
+           elink_txrd_wait,
+           elink_txwr_wait,
+           elink_txrr_wait,
+
+           elink_mailbox_not_empty,
+           elink_mailbox_full
 	   );
     end
+
 
     reg toggle = 0;
     always @(posedge clock) begin
@@ -178,41 +179,31 @@ module tb_elink;
 
     initial begin
 	forever begin
-	    #100 keep_alive <= ~keep_alive;
+	    #100 keep_alive = ~keep_alive;
 	end
     end
     
     // ELink design-under-test
     //defparam dut.ELINKID = 12'h800;
-    defparam dut.ID = 12'h800;  // set to 810 as default
+    defparam dut.ID = 12'h800;   // set to 810 as default
     elink 
       dut(
 	  // man.o.man they are chaning this interface way too often
-	  // why is it not set by now
-	  //.hard_reset        ( elink_hard_reset       ) ,	  
-          //.clkin             ( elink_clkin            ) ,
-	  //.clkbypass         ( elink_clkbypass        ) ,
-      
-	  //.rowid             ( elink_rowid            ) ,
-	  //.colid             ( elink_colid            ) ,	  
-	  //.chip_resetb       ( elink_chip_resetb      ) ,
-          //.cclk_p            ( elink_cclk_p           ) ,
-	  //.cclk_n            ( elink_cclk_n           ) ,
-
+	  // why is it not set by now?
 	  // clocks and resets
-	  .reset             ( reset                  ), // por reset
-	  .sys_clk           ( clock                  ), // system clock for FIFOs only
-	  .tx_lclk           ( ), // fast tx clock for IO
-	  .tx_lclk90         ( ), // fast 90deg shifted lclk
-	  .tx_lclk_div4      ( ), // slow tx clock for core logic
-	  .rx_lclk           ( ), // rx input clock tweaked by pll for IO
-	  .rx_lclk_div4      ( ), // slow rx clock for core logic
-	  .rx_ref_clk        ( ), // 200MHz ref clock for idelay
-	  .rx_lclk_pll       ( ), // rx_lclk input for pll
+	  .reset             ( elink_reset            ),  // por reset
+	  .sys_clk           ( elink_sys_clk          ),  // system clock for FIFOs only
+	  .tx_lclk           ( elink_tx_lclk          ),  // fast tx clock for IO
+	  .tx_lclk90         ( elink_tx_lclk90        ),  // fast 90deg shifted lclk
+	  .tx_lclk_div4      ( elink_tx_lclk_div4     ),  // slow tx clock for core logic
+	  .rx_lclk           ( elink_rx_lclk          ),  // rx input clock tweaked by pll for IO
+	  .rx_lclk_div4      ( elink_rx_lclk_div4     ),  // slow rx clock for core logic
+	  .rx_ref_clk        ( elink_rx_ref_clk       ),  // 200MHz ref clock for idelay
+	  .rx_lclk_pll       ( elink_rx_lclk_pll      ),  // rx_lclk input for pll
       
 	  // EPIPHANY interface I/O
-	  .chipid            ( ), // chip id strap pins
-	  .elink_en          ( ), // elink/ephiphany master enable 
+	  .chipid            ( elink_chipid           ),  // chip id strap pins
+	  .elink_en          ( elink_en               ),  // elink/ephiphany master enable 
       
 	  // ELINK I/O pins
 	  .rxi_lclk_p        ( elink_rxi_lclk_p       ) ,	  
@@ -240,33 +231,26 @@ module tb_elink;
 	  .txi_rd_wait_n     ( elink_txi_rd_wait_n    ) ,
 
 	  // System Interface
-          //.rxwr_clk          ( elink_rxwr_clk         ) ,	  
 	  .rxwr_access       ( elink_rxwr_access      ) ,
           .rxwr_packet       ( elink_rxwr_packet      ) ,  
           .rxwr_wait         ( elink_rxwr_wait        ) ,
 
-          //.rxrd_clk          ( elink_rxrd_clk         ) ,	  
           .rxrd_access       ( elink_rxrd_access      ) ,
           .rxrd_packet       ( elink_rxrd_packet      ) ,
 	  .rxrd_wait         ( elink_rxrd_wait        ) ,
 
-          //.rxrr_clk          ( elink_rxrr_clk         ) ,
 	  .rxrr_access       ( elink_rxrr_access      ) ,
           .rxrr_packet       ( elink_rxrr_packet      ) ,     	  
           .rxrr_wait         ( elink_rxrr_wait        ) ,	  	   		     
 
-	  //.txwr_clk          ( elink_txwr_clk         ) ,	            
           .txwr_access       ( elink_txwr_access      ) ,
           .txwr_packet       ( elink_txwr_packet      ) ,
           .txwr_wait         ( elink_txwr_wait        ) ,
 
-
-	  //.txrd_clk          ( elink_txrd_clk         ) ,
           .txrd_access       ( elink_txrd_access      ) ,
           .txrd_packet       ( elink_txrd_packet      ) ,	  
 	  .txrd_wait         ( elink_txrd_wait        ) ,
 
-	  //.txrr_clk          ( elink_txrr_clk         ) ,	  	  	  
           .txrr_access       ( elink_txrr_access      ) ,	  		     
 	  .txrr_packet       ( elink_txrr_packet      ) ,	 
           .txrr_wait         ( elink_txrr_wait        ) ,

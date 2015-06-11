@@ -188,15 +188,15 @@ def main(refpath, args):
         # of the converted testbench.
         toVerilog(m_elink_stub, elink)
 
-    print('pickle ports')
+    print('pickle ports (elink_ports.pkl)')
     pickle.dump(elink.ports, open('elink_ports.pkl', 'wb'), protocol=-1)        
 
     try:
         # @note: currenlty Signal cannot be pickled because the 
         #    defined __slots__ and not __getstate__, in general is 
         #    it a good idea to be able to pickel MyHDL objects?
-        print('pickle elink interface')
-        pickle.dump(elink, open('elink.pkl', 'wb'), protocol=-1)
+        print('pickle elink interface (elink_intf.pkl)')
+        pickle.dump(elink, open('elink_intf.pkl', 'wb'), protocol=-1)
     except:
         print("@E: myhdl.Signal not picklable")
         

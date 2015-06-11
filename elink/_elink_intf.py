@@ -78,15 +78,18 @@ class ELink(object):
             while True:
                 yield delay(CLKINC)
                 cnt = (cnt + CLKINC) % CLKMOD
+                # @todo: make the clocks more variable, determine which is async
+                #        to each other and use random values (save the random values)
                 if (cnt % SYSHCYC) == 0:
                     self.sys_clk.next = not self.sys_clk
                     self.tx.lclk_div4.next = not self.tx.lclk_div4
                     self.rx.lclk_div4.next = not self.rx.lclk_div4
-                elif (cnt % LCLKHCYC) == 0:
+                if (cnt % LCLKHCYC) == 0:
                     self.tx.lclk.next = not self.tx.lclk
                     self.rx.lclk.next = not self.rx.lclk
-                elif (cnt % LCLKHCYC) == LCLK90DEG:
-                    self.tx.lclk90 = not self.tx.lclk90
+                    self.rx.ref_clk.next = not self.rx.ref_clk
+                if (cnt % LCLKHCYC) == LCLK90DEG:
+                    self.tx.lclk90.next = not self.tx.lclk90
 
         return gclkgen
 
