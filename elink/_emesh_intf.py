@@ -49,7 +49,7 @@ class EMesh(object):
         dw = self.data_width
         pw = self.packet_width
 
-        # create the
+        # create the packet
         @always_comb
         def assign_packet():
             self.packet.next[0] = self.access

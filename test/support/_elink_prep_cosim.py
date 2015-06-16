@@ -35,6 +35,7 @@ def prep_cosim(clock, reset, keep_alive, elink, args=None):
     rc = subprocess.call(cmd)
     assert rc == 0, "failed to build Verilog"
 
+    # store the VCD files in a separate directory
     if not os.path.exists('vcd'):
         os.makedirs('vcd')
 
@@ -46,8 +47,16 @@ def prep_cosim(clock, reset, keep_alive, elink, args=None):
     # the Verilog elink.v (support._elink_extract_ports.main)
     ports = pickle.load(open('support/elink_ports.pkl', 'r'))
 
+    # The testbench(es) use interfaces (with embedded transactors) to drive
+    # the Verilog DUT.  The interfaces are also used in the MyHDL version.
+    # The interfaces (elink, emesh, etc.) need to be mapped to the DUT.
+    # The mapping can be done manually or the hard wary :)  A function was
+    # created that tries to extract the signal names and match them to the
+    # ports.  The "ports" reference is a dictionary with all the Signals
+    # to and from the Verilog DUT.
+
     # references the signals in the interface ...
-    gmap = elink_map_ports(ports, elink)  
+    gmap = elink_map_ports(ports, elink)
     elink_ports = elink.ports
 
     # create the cosim generator to be passed to the MyHDL simulator
@@ -66,10 +75,10 @@ def prep_cosim(clock, reset, keep_alive, elink, args=None):
 
 if __name__ == '__main__':
     args = Namespace(
-        build_only=True,          # build only
-        vtrace=True,              # enable VCD tracing in Verilog cosim
-        vtrace_level=0,           # Verilog VCD dumpvars level
-        vtrace_module='tb_elink', # Verilog VCD dumpvars module to trace
+        build_only=True,           # build only
+        vtrace=True,               # enable VCD tracing in Verilog cosim
+        vtrace_level=0,            # Verilog VCD dumpvars level
+        vtrace_module='tb_elink',  # Verilog VCD dumpvars module to trace
     )
 
     prep_cosim(Signal(bool(0)), ResetSignal(0, 0, False),

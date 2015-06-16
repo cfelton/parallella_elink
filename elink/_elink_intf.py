@@ -1,22 +1,8 @@
 
 from myhdl import *
 
-# @todo: this object needs to be shared between the MyHDL version
-#    and the Cosimulation version.
-class ELinkChannel(object):
-    def __init__(self, name):
-        self.name = name
-
-        # clocks for the channel
-        self.lclk = Signal(bool(0))
-        self.lclk90 = Signal(bool(0))
-        self.lclk_div4 = Signal(bool(0))
-        self.ref_clk = Signal(bool(0))
-
-        self.frame = Signal(bool(0))
-        self.data = Signal(intbv(0)[8:])
-        self.wr_wait = Signal(bool(0))
-        self.rd_wait = Signal(bool(0))
+from _elink_channel_intf import ELinkChannel
+from _emesh_intf import EMesh
 
 
 class ELink(object):
@@ -29,12 +15,24 @@ class ELink(object):
         self.sys_clk = Signal(bool(0))   # system clock for FIFOs only
 
         # data in channel
-        self.tx = ELinkChannel('tx')
-        self.rx = ELinkChannel('rx')
+        self.tx = ELinkChannel('tx')     # transmit channel to external device
+        self.rx = ELinkChannel('rx')     # receive channel from external device
 
-        # AXI master
+        # internal system interface
+        self.rxwr = EMesh('rxwr')        # master write (from RX)
+        self.rxrd = EMesh('rxrd')        # master read request (from RX)
+        self.rxrr = EMesh('rxrr')        # slave read reqsponse (from RX)
 
-        # AXI slave
+        self.txwr = EMesh('txwr')        # slave write (to TX)
+        self.txrd = EMesh('txrd')        # slave read request (to TX)
+        self.txrr = EMesh('txrr')        # master read response (to TX)
+
+        # various interface / control signals
+        self.chipid = Signal(intbv(0)[12:])
+        self.en = Signal(bool(1))
+        self.mailbox_full = Signal(bool(0))
+        self.mailbox_not_empty = Signal(bool(0))
+        self.timeout = Signal(bool(0))
 
         # map the raw IO from `elink.v` to the interface
         self.ports = {}        

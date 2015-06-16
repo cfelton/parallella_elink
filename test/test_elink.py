@@ -21,12 +21,12 @@ def run_testbench(args):
     keep_alive = Signal(bool(0))
 
     # Interface to the parallella/epiphany: elink
-    elink = ELink()       # interface between FPGA <-> Epiphany
-    emesh_ext = EMesh()   # ??
-    emesh_dv = EMesh()    # ??
+    #elinkm = ELink()     # interface to the MyHDL implementation 
+    elinkv = ELink()       # interface to the Verilog implementation
 
     # Verilog reference design Cosimulation
-    tbdutv = prep_cosim(clock, reset, keep_alive, elink, args=args)
+    #tbdut = m_elink(glbl, elinkm)
+    tbdutv = prep_cosim(clock, reset, keep_alive, elinkv, args=args)
 
     # clock generators, assumes 1 ps simulation timestep
     @always(delay(10000))
@@ -35,18 +35,23 @@ def run_testbench(args):
 
     def _test():
 
-        tbintf = elink.get_gens()
-        tbloop = elink.loopback()
+        # interface to the MyHDL implementation
+        tbintfm = elinkv.get_gens()
+        tbloopm = elinkv.loopback()
+
+        # interface to the Verilog implementation
+        tbintfv = elinkv.get_gens()
+        tbloopv = elinkv.loopback()
 
         def pulse_reset():
             reset.next = reset.active
-            elink.reset.next = False
-            yield elink.sys_clk.posedge
-            elink.reset.next = True
-            yield elink.sys_clk.posedge
+            elinkv.reset.next = False
+            yield elinkv.sys_clk.posedge
+            elinkv.reset.next = True
+            yield elinkv.sys_clk.posedge
             yield delay(11113)
             reset.next = not reset.active
-            elink.reset.next = False
+            elinkv.reset.next = False
             yield delay(100)
             yield clock.posedge
 
@@ -76,7 +81,7 @@ def run_testbench(args):
             if keep_alive:
                 toggle_when_alive.next = not toggle_when_alive
 
-        return tbclk, tbintf, tbloop, tbstim, tbmon
+        return tbclk, tbintfm, tbloopm, tbintfv, tbloopv, tbstim, tbmon
 
     if args.trace:
         traceSignals.name = 'vcd/_test_elink'
