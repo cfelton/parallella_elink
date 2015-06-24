@@ -1,13 +1,13 @@
 [*]
 [*] GTKWave Analyzer v3.3.57 (w)1999-2014 BSI
-[*] Sat Jun  6 15:11:48 2015
+[*] Tue Jun 16 12:37:26 2015
 [*]
 [dumpfile] "/Users/cfelton/Projects/parallella/parallella_elink/test/vcd/_tb_elink.vcd"
-[dumpfile_mtime] "Thu Jun  4 15:16:21 2015"
-[dumpfile_size] 7019
+[dumpfile_mtime] "Tue Jun 16 12:20:27 2015"
+[dumpfile_size] 7156
 [savefile] "/Users/cfelton/Projects/parallella/parallella_elink/test/vcd/_tb_elink.gtkw"
 [timestart] 0
-[size] 1832 708
+[size] 1844 844
 [pos] -1 -1
 *-26.000000 10000002 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb_elink.
@@ -15,13 +15,13 @@
 [sst_width] 223
 [signals_width] 279
 [sst_expanded] 1
-[sst_vpaned_height] 211
+[sst_vpaned_height] 245
 @28
 tb_elink.reset[0]
 tb_elink.clock[0]
-tb_elink.keep_alive[0]
 tb_elink.toggle[0]
 @200
+-
 -~~~[ELINK]~~~
 @28
 tb_elink.dut.reset[0]
@@ -47,5 +47,14 @@ tb_elink.dut.rx_ref_clk[0]
 @28
 tb_elink.dut.mailbox_full[0]
 tb_elink.dut.mailbox_not_empty[0]
+@20000
+-
+@28
+tb_elink.dut.txwr_access[0]
+tb_elink.dut.txwr_gated_access[0]
+@22
+tb_elink.dut.txwr_packet[103:0]
+@29
+tb_elink.dut.txwr_wait[0]
 [pattern_trace] 1
 [pattern_trace] 0

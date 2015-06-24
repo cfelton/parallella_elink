@@ -64,20 +64,20 @@ def run_testbench(args):
             for ii in range(100):
                 yield delay(1000)
 
+            yield elinkv.txwr.g_nop()
+            yield elinkv.txwr.g_set_clock(div=1)
+            yield elinkv.txwr.g_nop()
+
+            for ii in range(100):
+                yield delay(1000)
+
             print("end simulation")
             raise StopSimulation
 
-        toggle_when_cclk = Signal(bool(0))
         toggle_when_alive = Signal(bool(0))
-
-        # test the auto-mapping
-        #cclk_p = elink.ports['elink_cclk_p']
-        #cclk_n = elink.ports['elink_cclk_n']
 
         @always(delay(1))
         def tbmon():
-            #if cclk_p and not cclk_n:
-            #    toggle_when_cclk.next = not toggle_when_cclk
             if keep_alive:
                 toggle_when_alive.next = not toggle_when_alive
 

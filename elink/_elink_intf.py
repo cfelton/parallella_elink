@@ -27,6 +27,14 @@ class ELink(object):
         self.txrd = EMesh('txrd')        # slave read request (to TX)
         self.txrr = EMesh('txrr')        # master read response (to TX)
 
+        self.rxwr.set_clock(self.sys_clk)
+        self.rxrd.set_clock(self.sys_clk)
+        self.rxrr.set_clock(self.sys_clk)
+
+        self.txwr.set_clock(self.sys_clk)
+        self.txrd.set_clock(self.sys_clk)
+        self.txrr.set_clock(self.sys_clk)
+
         # various interface / control signals
         self.chipid = Signal(intbv(0)[12:])
         self.en = Signal(bool(1))
@@ -77,10 +85,17 @@ class ELink(object):
         return gclkgen
 
     def get_gens(self):
-        
+
+        # clock generation for the interface
         gclk = self.clkgen()
 
-        return instances()
+        # packet assignments
+        gpkt = [self.rxwr.m_packet(), self.rxrd.m_packet(), self.rxrr.m_packet(),
+                self.txwr.m_packet(), self.txrd.m_packet(), self.txrr.m_packet()]
+
+        # @todo: packet monitors
+
+        return gclk, gpkt
 
     def loopback(self):
 

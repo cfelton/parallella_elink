@@ -37,7 +37,7 @@ class EMesh(object):
         self.ctrlmode = Signal(intbv(0)[4:])
         self.dstaddr = Signal(intbv(0)[address_width:])
         self.data = Signal(intbv(0)[data_width:])
-        self.scraddr = Signal(intbv(0)[address_width:])
+        self.srcaddr = Signal(intbv(0)[address_width:])
         self.clock = None
 
     def set_clock(self, clock):
