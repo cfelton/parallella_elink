@@ -13,7 +13,7 @@ class EMesh(object):
     write         | [1]     | Indicates a write transaction
     datamode[1:0] | [3:2]   | Datasize (00=8b,01=16b,10=32b,11=64b)
     ctrlmode[3:0] | [7:4]   | Various special modes for the Epiphany chip
-    dstraddr[31:0]| [39:8]  | Address for write, read-request, or
+    dstaddr[31:0]| [39:8]  | Address for write, read-request, or
                               read-responses
     data[31:0]    | [71:40] | Data for write transaction, data for
                               read response

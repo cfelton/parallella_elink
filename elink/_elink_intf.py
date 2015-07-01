@@ -4,7 +4,9 @@ from myhdl import *
 from _elink_channel_intf import ELinkChannel
 from _emesh_intf import EMesh
 
-
+# @todo: This is the Cosimulation Interface, it needs to be renamed
+#    and possibly moved to the test support directory.  This interface
+#    is specific to the Verilog implementation.
 class ELink(object):
     name = ''
 
