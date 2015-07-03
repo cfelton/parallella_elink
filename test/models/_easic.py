@@ -16,7 +16,7 @@ def elink_asic_model(elink):
     @always_comb
     def p_assign():
         # @todo: interpret the packet stream and model some of the
-        #    registers.
+        #    functions and registers.
         tx.lclk.next = rx.lclk
         tx.frame.next = rx.frame
         tx.data.next = rx.data

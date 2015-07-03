@@ -121,11 +121,12 @@ class ELink(object):
     def send_packet(self, emesh, block=True):
         bytes = emesh.tobytes()
         tpkt = _ELinkTransaction(bytes)
+        print("  [elink] transmit pkt {}".format(emesh))
         self._tx_fifo.append(tpkt)
         if block:
             yield tpkt.finished.posedge
 
-    def recieve_packet(self, emesh, block=True):
+    def receive_packet(self, emesh, block=True):
         ntrans = len(self._rx_fifo)
         while ntrans == 0 and block:
             yield self._rx.lclk.posedge
@@ -148,20 +149,22 @@ class ELink(object):
         """
         @instance
         def tx_bytes():
-            if len(self._tx_fifo) > 0:
-                pkt = self._tx_fifo.pop(0)
-                assert isinstance(pkt, _ELinkTransaction)
-                yield self._send_bytes(pkt.bytes)
-                pkt.finished.next = True
-            else:
-                # @todo: empty signal to the fifo, wait on the edge
-                yield self._tx.lclk.posedge
+            while True:
+                if len(self._tx_fifo) > 0:
+                    pkt = self._tx_fifo.pop(0)
+                    assert isinstance(pkt, _ELinkTransaction)
+                    yield self._send_bytes(pkt.bytes)
+                    pkt.finished.next = True
+                else:
+                    # @todo: empty signal to the fifo, wait on the edge
+                    yield self._tx.lclk.posedge
 
         @instance
         def rx_bytes():
-            bytes = [None for _ in range(13)]
-            yield self._receive_bytes(bytes)
-            self._rx_fifo.append(_ELinkTransaction(bytes))
+            while True:
+                bytes = [None for _ in range(13)]
+                yield self._receive_bytes(bytes)
+                self._rx_fifo.append(_ELinkTransaction(bytes))
 
         return tx_bytes, rx_bytes
 
@@ -179,7 +182,7 @@ class ELink(object):
         while ri < 13:
             yield self._rx.lclk.posedge
             if self._rx.frame:
-                bytes[ri] = intbv(self.data)[8:0]
+                bytes[ri] = intbv(int(self._rx.data))[8:0]
                 ri += 1
 
 

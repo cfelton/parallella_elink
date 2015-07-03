@@ -17,21 +17,10 @@ def elink_external_model(elink, emesh):
 
     # get the clock generator for the interface
     g_txclk = tx.instances()
+    # use the elink process to drive the signals
     g_elink = elink.process()
+    g_emesh = emesh.process(elink)
 
-    @instance
-    def g_translate():
-
-        # translate the EMesh transactions to ELink transactions
-        while True:
-            if emesh.txwr.access:
-                if emesh.txwr.write:
-                    yield elink.write_packet(emesh.txwr)
-                else:
-                    yield elink.read_packet(emesh.txrd)
-
-            yield emesh.clock.posedge
-
-    return g_txclk, g_elink, g_translate
+    return g_txclk, g_elink, g_emesh
 
 
