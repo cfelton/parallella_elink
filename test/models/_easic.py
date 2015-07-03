@@ -11,7 +11,7 @@ def elink_asic_model(elink):
     assert isinstance(elink, ELink)
 
     # get the tx and rx links based on this logical location
-    tx, rx = elink.south()
+    tx, rx = elink.connect('south')
 
     @always_comb
     def p_assign():

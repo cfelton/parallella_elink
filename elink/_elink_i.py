@@ -31,19 +31,31 @@ class ELinkChannel(object):
                 yield delay(self.htick)
                 self.lclk.next = not self.lclk
 
+        return gclkgen
+
     def instances(self):
         return self._clkgen()
+
+
+class _ELinkTransaction(object):
+    """ Simple object to manage ELink transactions
+    """
+    def __init__(self, bytes):
+        if not isinstance(bytes[0], intbv):
+            bytes = [intbv(bb)[8:] for bb in bytes]
+        self.bytes = bytes               # bytes to be transferred
+        self.finished = Signal(bool(0))  # transfer finished / completed
 
 
 class ELink(object):
     """
     The ELink interface is the external interface between devices (typically
-    the Adapteva Epiphany and an FPGA.
+    the Adapteva Epiphany and an FPGA).
 
-    @todo: more description
+    @todo: more description ...
 
     The Epiphany datasheet (has a description of the chip-to-chip (ELink)
-    interfaces:
+    interfaces):
     http://www.adapteva.com/docs/e16g301_datasheet.pdf
 
     The Parallella open-hardware (oh) repository:
@@ -54,34 +66,104 @@ class ELink(object):
         self._tx = ELinkChannel()
         self._rx = ELinkChannel()
 
+        self._tx_fifo = []
+        self._rx_fifo = []
+
         # Keep track how this interface is connected, only an east-west or
         # north-south connections can be established (not both).
         # The east-west and north-south are redundant but commonly used.
         self.connections = {'east': False, 'west': False,
                             'north': False, 'south': False}
 
-    def east(self):
-        assert not self.connections['east'], "East connection exists"
-        self.connection['east'] = True
-        return self._tx, self._rx
-
-    def west(self):
-        assert not self.connections['west'], "West connection exists"
-        self.connection['west'] = True
-        return self._rx, self._tx
-
-    def north(self):
-        assert not self.connections['north'], "North connection exists"
-        self.connection['north'] = True
-        return self._tx, self._rx
-
-    def south(self):
-        assert not self.connections['south'], "South connection exists"
-        self.connection['south'] = True
-        return self._rx, self._tx
+    def connect(self, pos):
+        """ Return relative relation
+        In this implementation the TX and RX are from the perspective of
+        the external link (e.g. the FPGA link).  This function is used
+        to get local perspective.
+        :param pos: where the component is logically positioned (located)
+        :return: tx link, rx link
+        """
+        pos = pos.lower()
+        assert pos in self.connections
+        assert not self.connections[pos], "{} connection exists".format(pos)
+        self.connections[pos] = True
+        if pos in ('east', 'north'):
+            links = self._tx, self._rx
+        elif pos in ('west', 'south'):
+            links = self._rx, self._tx
+        return links
 
     def instances(self):
         return self.tx.instances(), self.rx.instances()
+
+    def write(self, dstaddr, data, srcaddr=0, block=True):
+        """A single ELink write transaction
+        """
+        packet = EMeshPacket(access=1, write=1, datamode=2,
+                             dstaddr=dstaddr, data=data, srcaddr=srcaddr)
+        bytes = packet.tobytes()
+        bpkt = _ELinkTransaction(bytes)
+        self._tx_fifo.append(bpkt)
+        if block:
+            yield bpkt.finished.posedge
+
+    def read(self, dstaddr, data, srcaddr=0, block=True):
+        """ A single ELink read transaction
+        """
+        packet = EMeshPacket(access=1, write=0, datamode=2,
+                             dstaddr=dstaddr, data=data, srcaddr=srcaddr)
+        bytes = packet.tobytes()
+        tpkt = _ELinkTransaction(bytes)
+        self._tx_fifo.append(tpkt)
+        if block:
+            yield tpkt.finished.posedge
+
+    def send_packet(self, emesh, block=True):
+        bytes = emesh.tobytes()
+        tpkt = _ELinkTransaction(bytes)
+        self._tx_fifo.append(tpkt)
+        if block:
+            yield tpkt.finished.posedge
+
+    def recieve_packet(self, emesh, block=True):
+        ntrans = len(self._rx_fifo)
+        while ntrans == 0 and block:
+            yield self._rx.lclk.posedge
+            ntrans = len(self._rx_fifo)
+
+        if len(self._rx_fifo) > 0:
+            tpkt = self._rx_fifo.pop(0)
+        emesh.frombytes(tpkt.bytes)
+
+    def write_bytes(self, bytes, block=True):
+        assert isinstance(bytes, (list, tuple))
+
+    def read_bytes(self, bytes, block=True):
+        assert isinstance(bytes, list)
+
+    def process(self):
+        """ Drive the ELink signals
+        This process mimics the behavior of the external ELink logic.
+        :return: myhdl generators
+        """
+        @instance
+        def tx_bytes():
+            if len(self._tx_fifo) > 0:
+                pkt = self._tx_fifo.pop(0)
+                assert isinstance(pkt, _ELinkTransaction)
+                yield self._send_bytes(pkt.bytes)
+                pkt.finished.next = True
+            else:
+                # @todo: empty signal to the fifo, wait on the edge
+                yield self._tx.lclk.posedge
+
+        @instance
+        def rx_bytes():
+            bytes = [None for _ in range(13)]
+            yield self._receive_bytes(bytes)
+            self._rx_fifo.append(_ELinkTransaction(bytes))
+
+        return tx_bytes, rx_bytes
 
     def _send_bytes(self, bytes):
         yield self._tx.lclk.posedge
@@ -97,32 +179,9 @@ class ELink(object):
         while ri < 13:
             yield self._rx.lclk.posedge
             if self._rx.frame:
-                bytes[ri] = int(self.data)
+                bytes[ri] = intbv(self.data)[8:0]
                 ri += 1
 
-    def tr_write(self, dstaddr, data, srcaddr=0):
-        """A single ELink write transaction
-        """
-        packet = EMeshPacket(access=1, write=1, datamode=2,
-                             dstaddr=dstaddr, data=data, srcaddr=srcaddr)
-        bytes = packet.tobytes()
-        yield self._send_bytes(bytes)
-        bytes = [None for _ in range(13)]
-        yield self._receive_bytes(bytes)
-        print(bytes)
-
-    def tr_read(self, dstaddr, data, srcaddr=0):
-        """ A single ELink read transaction
-        """
-        packet = EMeshPacket(access=1, write=0, datamode=2,
-                             dstaddr=dstaddr, data=data, srcaddr=srcaddr)
-        bytes = packet.tobytes()
-        yield self._send_bytes(bytes)
-        bytes = [None for _ in range(13)]
-        yield self._receive_bytes(bytes)
-        print(bytes)
-
-    # @todo: setup streaming transactions
 
 
 
