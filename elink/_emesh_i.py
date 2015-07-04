@@ -4,6 +4,8 @@ from __future__ import print_function
 
 from myhdl import *
 
+from ._fifo_i import FIFO
+
 
 class EMeshPacket(object):
     """
@@ -88,7 +90,8 @@ class EMeshPacket(object):
 class EMesh(object):
     """
     The EMesh interface on the external ELinks is defined as having
-    three EMeshPacket conduits.  These conduits
+    three EMeshPacket conduits.  These conduits are used to send
+    write and read requests over the Elink.
     """
     def __init__(self, clock):
 
@@ -101,9 +104,14 @@ class EMesh(object):
         self.rxrd = EMeshPacket()  # RX read, receive external read commands
         self.rxrr = EMeshPacket()  # RX read response, receive read acknowledge
 
-        self._txwr_fifo = []
-        self._txrd_fifo = []
-        self._txrr_fifo = []
+        #self._txwr_fifo = []
+        #self._txrd_fifo = []
+        #self._txrr_fifo = []
+
+        self._txwr_fifo = FIFO()
+        self._txrd_fifo = FIFO()
+        self._txrr_fifo = FIFO()
+
 
     def write(self, dstaddr, data, datau=0):
         """
@@ -120,7 +128,7 @@ class EMesh(object):
 
         # push the packet onto the TX write FIFO
         print("  send write packet {}".format(pkt))
-        self._txwr_fifo.append(pkt)
+        self._txwr_fifo.write(pkt)
 
         #
         #self.txwr.access.next = True
@@ -158,13 +166,14 @@ class EMesh(object):
         @instance
         def ptrans():
             while True:
-                if len(self._txwr_fifo) > 0:
+                if not self._txwr_fifo.isempty():
                     pkt = self._txwr_fifo.pop(0)
                     print("  push packet to elink intf {}".format(pkt))
                     self.txwr.assign(pkt)    # update the interface to reflect this
                     yield elink.send_packet(pkt)
-                # @todo the other transmit FIFOs
-                yield self.clock.posedge
+
+                # wait for one of the FIFOs not empty
+                yield self._txwr_fifo.empty.negedge
         return ptrans
 
     def route_to_fifo(self, pkt):
@@ -176,7 +185,7 @@ class EMesh(object):
 
         not convertible
         """
-        # if the write bit is set pass it to RX write FIFOg
+        # if the write bit is set pass it to RX write FIFO
         # @todo: how to determine the other packets??
         pass
 
