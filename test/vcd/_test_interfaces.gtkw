@@ -1,39 +1,46 @@
 [*]
-[*] GTKWave Analyzer v3.3.58 (w)1999-2014 BSI
-[*] Thu Jul  2 03:17:21 2015
+[*] GTKWave Analyzer v3.3.57 (w)1999-2014 BSI
+[*] Tue Jul  7 23:58:29 2015
 [*]
 [dumpfile] "/Users/cfelton/Projects/parallella/parallella_elink/test/vcd/_test_interfaces.vcd"
-[dumpfile_mtime] "Thu Jul  2 03:15:40 2015"
-[dumpfile_size] 931
+[dumpfile_mtime] "Sat Jul  4 01:28:24 2015"
+[dumpfile_size] 8951
 [savefile] "/Users/cfelton/Projects/parallella/parallella_elink/test/vcd/_test_interfaces.gtkw"
 [timestart] 0
-[size] 1000 600
-[pos] 73 -3
-*-5.927345 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[size] 1844 844
+[pos] -1 -1
+*-12.816629 19500 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] vcd/_test_interfaces.
+[treeopen] vcd/_test_interfaces.tbnorth.
 [sst_width] 193
-[signals_width] 133
+[signals_width] 270
 [sst_expanded] 1
 [sst_vpaned_height] 168
-@201
+@200
 -NORTH
 @28
-vcd/_test_interfaces.tbnorth.emesh_clock
+vcd/_test_interfaces.tbnorth.g_elink.self__tx_lclk
+vcd/_test_interfaces.tbnorth.g_emesh.self__txwr_fifo_empty
+@201
+-
 @200
 -SOUTH
+@28
+vcd/_test_interfaces.tbsouth.rx_lclk
+vcd/_test_interfaces.tbsouth.rx_frame
 @22
 vcd/_test_interfaces.tbsouth.rx_data[7:0]
+@200
+-
 @28
-vcd/_test_interfaces.tbsouth.rx_frame
-vcd/_test_interfaces.tbsouth.rx_lclk
-vcd/_test_interfaces.tbsouth.rx_rd_wait
-vcd/_test_interfaces.tbsouth.rx_wr_wait
+vcd/_test_interfaces.tbsouth.tx_lclk
+vcd/_test_interfaces.tbsouth.tx_frame
 @22
 vcd/_test_interfaces.tbsouth.tx_data[7:0]
+@200
+-
 @28
-vcd/_test_interfaces.tbsouth.tx_frame
-vcd/_test_interfaces.tbsouth.tx_lclk
-vcd/_test_interfaces.tbsouth.tx_rd_wait
-vcd/_test_interfaces.tbsouth.tx_wr_wait
+vcd/_test_interfaces.tbsouth.pkt_i_fifo_empty
+vcd/_test_interfaces.tbsouth.pkt_o_fifo_empty
 [pattern_trace] 1
 [pattern_trace] 0

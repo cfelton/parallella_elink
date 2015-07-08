@@ -4,7 +4,8 @@ from __future__ import print_function
 
 from myhdl import *
 
-from _emesh_i import EMeshPacket
+from ._emesh_i import EMeshPacket
+from ._fifo_i import FIFO
 
 class ELinkChannel(object):
     """ RX or TX channel in an ELink interface
@@ -66,8 +67,8 @@ class ELink(object):
         self._tx = ELinkChannel()
         self._rx = ELinkChannel()
 
-        self._tx_fifo = []
-        self._rx_fifo = []
+        self._tx_fifo = FIFO()
+        self._rx_fifo = FIFO()
 
         # Keep track how this interface is connected, only an east-west or
         # north-south connections can be established (not both).
@@ -94,7 +95,7 @@ class ELink(object):
         return links
 
     def instances(self):
-        return self.tx.instances(), self.rx.instances()
+        return self._tx.instances(), self._rx.instances()
 
     def write(self, dstaddr, data, srcaddr=0, block=True):
         """A single ELink write transaction
@@ -103,7 +104,7 @@ class ELink(object):
                              dstaddr=dstaddr, data=data, srcaddr=srcaddr)
         bytes = packet.tobytes()
         bpkt = _ELinkTransaction(bytes)
-        self._tx_fifo.append(bpkt)
+        self._tx_fifo.write(bpkt)
         if block:
             yield bpkt.finished.posedge
 
@@ -121,20 +122,20 @@ class ELink(object):
     def send_packet(self, emesh, block=True):
         bytes = emesh.tobytes()
         tpkt = _ELinkTransaction(bytes)
-        print("  [elink] transmit pkt {}".format(emesh))
-        self._tx_fifo.append(tpkt)
+        self._tx_fifo.write(tpkt)
         if block:
             yield tpkt.finished.posedge
 
     def receive_packet(self, emesh, block=True):
-        ntrans = len(self._rx_fifo)
-        while ntrans == 0 and block:
-            yield self._rx.lclk.posedge
-            ntrans = len(self._rx_fifo)
+        if self._rx_fifo.is_empty() and block:
+            yield self._rx_fifo.empty.negedge
 
-        if len(self._rx_fifo) > 0:
-            tpkt = self._rx_fifo.pop(0)
-        emesh.frombytes(tpkt.bytes)
+        # if blocked will not be empty, if not block maybe
+        if not self._rx_fifo.is_empty():
+            tpkt = self._rx_fifo.read()
+            emesh.frombytes(tpkt.bytes)
+            # allow emesh to update
+            yield self._rx.lclk.posedge
 
     def write_bytes(self, bytes, block=True):
         assert isinstance(bytes, (list, tuple))
@@ -146,25 +147,28 @@ class ELink(object):
         """ Drive the ELink signals
         This process mimics the behavior of the external ELink logic.
         :return: myhdl generators
+
+        @todo: this really needs to exist in a specific module model???
+
+        not convertible
         """
         @instance
         def tx_bytes():
             while True:
-                if len(self._tx_fifo) > 0:
-                    pkt = self._tx_fifo.pop(0)
+                if not self._tx_fifo.is_empty():
+                    pkt = self._tx_fifo.read()
                     assert isinstance(pkt, _ELinkTransaction)
                     yield self._send_bytes(pkt.bytes)
                     pkt.finished.next = True
                 else:
-                    # @todo: empty signal to the fifo, wait on the edge
-                    yield self._tx.lclk.posedge
+                    yield self._tx_fifo.empty.negedge
 
         @instance
         def rx_bytes():
             while True:
                 bytes = [None for _ in range(13)]
                 yield self._receive_bytes(bytes)
-                self._rx_fifo.append(_ELinkTransaction(bytes))
+                self._rx_fifo.write(_ELinkTransaction(bytes))
 
         return tx_bytes, rx_bytes
 

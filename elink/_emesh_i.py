@@ -28,14 +28,13 @@ class EMeshPacket(object):
         # set the packet fields
         self.access = Signal(bool(access))
         self.write = Signal(bool(write))
-        self.datamode = Signal(intbv(datamode)[1:])
+        self.datamode = Signal(intbv(datamode)[2:])
         self.ctrlmode = Signal(intbv(ctrlmode)[4:])
         self.dstaddr = Signal(intbv(dstaddr)[32:])
         self.data = Signal(intbv(data)[32:])
         self.srcaddr = Signal(intbv(srcaddr)[32:])
 
         # all the above a flattened into a signal bus
-        #self.bits = Signal(intbv(0)[104:])
         self.bits = ConcatSignal(self.srcaddr, self.data, self.dstaddr,
                                  self.ctrlmode, self.datamode, self.write,
                                  self.access)
@@ -44,25 +43,33 @@ class EMeshPacket(object):
         self.finished = Signal(bool(0))
 
     def __str__(self):
-        return "{:013X}".format(int(self.bits))
+        bits = self._bits()
+        return "{:026X}".format(int(bits))
+
+    def _bits(self):
+        bits = concat(self.srcaddr, self.data, self.dstaddr,
+                      self.ctrlmode, self.datamode, self.write, self.access)
+        return bits
 
     def tobytes(self):
         bytes = [intbv(0)[8:] for _ in range(13)]
+        bits = self._bits()
         for ii in range(13):
-            bytes[ii][:] = self.bits[8*ii+8:8*ii]
+            bytes[ii][:] = bits[8*ii+8:8*ii]
         return bytes
 
     def frombytes(self, bytes):
+        self.clear()
         self.access.next = bytes[0][0]
         self.write.next = bytes[0][1]
         self.datamode.next = bytes[0][4:2]
         self.ctrlmode.next = bytes[0][8:4]
-        self.dstaddr.next = concat(*bytes[5:1])
-        self.data.next = concat(*bytes[9:5])
-        self.data.next = concat(*bytes[13:9])
+        self.dstaddr.next = concat(*reversed(bytes[1:5]))
+        self.data.next = concat(*reversed(bytes[5:9]))
+        self.srcaddr.next = concat(*reversed(bytes[9:13]))
 
     def clear(self):
-        self.acces.next = False
+        self.access.next = False
         self.write.next = False
         self.datamode.next = 0
         self.ctrlmode.next = 0
@@ -82,16 +89,14 @@ class EMeshPacket(object):
         self.data.next = pkt.data
         self.srcaddr.next = pkt.srcaddr
 
-    def instances(self):
-        g = self.assign()
-        return g
-
 
 class EMesh(object):
     """
     The EMesh interface on the external ELinks is defined as having
     three EMeshPacket conduits.  These conduits are used to send
     write and read requests over the Elink.
+
+
     """
     def __init__(self, clock):
 
@@ -104,77 +109,70 @@ class EMesh(object):
         self.rxrd = EMeshPacket()  # RX read, receive external read commands
         self.rxrr = EMeshPacket()  # RX read response, receive read acknowledge
 
-        #self._txwr_fifo = []
-        #self._txrd_fifo = []
-        #self._txrr_fifo = []
+        # transmit and receive FIFOs
+        # @todo: want these to be private (_) but then a bunch of
+        #        methods need to be added to wait on packet events
+        self.packet_types = ('wr', 'rd', 'rr',)
+        self.txwr_fifo = FIFO()
+        self.txrd_fifo = FIFO()
+        self.txrr_fifo = FIFO()
 
-        self._txwr_fifo = FIFO()
-        self._txrd_fifo = FIFO()
-        self._txrr_fifo = FIFO()
+        self.rxwr_fifo = FIFO()
+        self.rxrd_fifo = FIFO()
+        self.rxrr_fifo = FIFO()
 
+        self._outstanding_reads = {}
+
+    def __str__(self):
+        s = "txwr: {}, txrd: {}, txrr: {}, rxwr: {}, rxrd: {}, rxrr: {}".format(
+             self.txwr_fifo.count, self.txrd_fifo.count, self.txrr_fifo.count,
+             self.rxwr_fifo.count, self.rxrd_fifo.count, self.rxrr_fifo.count)
+        return s
 
     def write(self, dstaddr, data, datau=0):
-        """
+        """ send a write packet
 
         :param dstaddr:
         :param data:
         :param srcaddr:
         :return:
 
-        not convertible
+        not convertible.
         """
         # get a new packet
-        pkt = EMeshPacket(access=True, write=True, dstaddr=dstaddr, data=data, srcaddr=datau)
-
+        pkt = EMeshPacket(access=True, write=True,
+                          dstaddr=dstaddr, data=data, srcaddr=datau)
         # push the packet onto the TX write FIFO
-        print("  send write packet {}".format(pkt))
-        self._txwr_fifo.write(pkt)
-
-        #
-        #self.txwr.access.next = True
-        #self.txwr.write.next = True
-        #self.txwr.data.next = data
-        #self.txwr.dstaddr.next = dstaddr
-        #if datau is not None:
-        #    self.txwr.srcaddr.next = datau
+        self.txwr_fifo.write(pkt)
         yield self.clock.posedge
 
     def read(self, dstaddr, data, srcaddr):
-        """
+        """ send a read packet
 
         :param dstaddr:
         :param data:
         :param srcaddr:
         :return:
 
-        not convertible
+        not convertible.
         """
         # sent a read packet through the txrd fifo
-        # if "blocking" wait for a resposse in the txrr
-        pass
+        pkt = EMeshPacket(access=True, write=False,
+                          dstaddr=dstaddr, data=data, srcaddr=srcaddr)
+        # push the packet onto the TX read FIFO
+        self.txrd_fifo.write(pkt)
+        self._outstanding_reads[dstaddr] = pkt
+        yield self.clock.posedge
 
-    def process(self, elink):
-        """ process the read and write transactions (generator)
-        This will take the FIFOs and send them to the ELink interface
-        passed.
-        :param elink:
+    def read_response(self, read_packet):
+        """ send a read response
+        :param read_packet:
         :return:
 
-        not convertible
+        @todo: complete
+        not convertible.
         """
-
-        @instance
-        def ptrans():
-            while True:
-                if not self._txwr_fifo.isempty():
-                    pkt = self._txwr_fifo.pop(0)
-                    print("  push packet to elink intf {}".format(pkt))
-                    self.txwr.assign(pkt)    # update the interface to reflect this
-                    yield elink.send_packet(pkt)
-
-                # wait for one of the FIFOs not empty
-                yield self._txwr_fifo.empty.negedge
-        return ptrans
+        pass
 
     def route_to_fifo(self, pkt):
         """ take a freshly recieved packet from the ELink interface
@@ -187,6 +185,23 @@ class EMesh(object):
         """
         # if the write bit is set pass it to RX write FIFO
         # @todo: how to determine the other packets??
-        pass
+
+        if pkt.write:
+            self.rxwr_fifo.write(pkt)
+        else:
+            # determine if this is a read-request or read-response.
+            pass
+
+    def get_packet(self, pkt_type):
+        assert pkt_type in self.packet_types
+        pkt = None
+        if pkt_type == 'wr':
+            pkt = self.rxwr_fifo.read()
+        elif pkt_type == 'rd':
+            pkt = self.rxrd_fifo.read()
+        elif pkt_type == 'rr':
+            pkt = self.rxrr_fifo.read()
+
+        return pkt
 
 

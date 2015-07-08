@@ -9,17 +9,18 @@ from elink import FIFO
 
 
 def elink_asic_model(elink):
-    """
+    """ Model a simple ELink device (something like Epiphany)
 
-    :param elink:
-    :return:
+    :param elink: Interface to the external ELink enabled device
+    :return: myhdl generators
 
-    not convertible
+    not convertible.
     """
     assert isinstance(elink, ELink)
 
     # get the tx and rx links based on this logical location
     tx, rx = elink.connect('south')
+    gclk = tx.instances()
 
     pkt_i_fifo = FIFO(depth=128)
     pkt_o_fifo = FIFO(depth=128)
@@ -27,17 +28,20 @@ def elink_asic_model(elink):
 
     @instance
     def p_rx_packets():
+        """ receive packets and push onto processing FIFO """
         while True:
             yield rx.frame.posedge
-            bytes, bcnt = [], 0
+            bytes = []
             yield rx.lclk.posedge
             while rx.frame:
-                bytes.append(int(rx.data))
+                bytes.append(intbv(int(rx.data))[8:])
                 if len(bytes) == 13:
                     pkt = EMeshPacket()
                     pkt.frombytes(bytes)
+                    yield delay(1)
                     pkt_i_fifo.write(pkt)
                     #@todo: if FIFO full assert wait
+                    bytes = []
                 yield rx.lclk.posedge
             # @todo: if len(bytes) != 13 report error - partial packet
 
@@ -46,35 +50,37 @@ def elink_asic_model(elink):
     # @todo: simulate EMesh routing
     @instance
     def p_proc_packets():
+        """ process packets """
+        idelay = False
         while True:
+            pkt = pkt_i_fifo.read()
+            if pkt is not None and pkt.access:
+                if not idelay:
+                    yield delay(17)
+                    idelay = True
+                pkt_o_fifo.write(pkt)
 
-            pkti = EMeshPacket()
-            if not pkt_i_fifo.isempty():
-                pkti = pkt_i_fifo.read()
-
-            pkto = pkt_delay[nslots-1]
-            if pkto.access:
-                pkt_o_fifo.write(int(pkto))
-
-            # update the delay chain
-            for ii in range(1, nslots):
-                pkt_delay[ii] = pkt_delay[ii-1]
-            pkt_delay[0] = pkti
-
-            yield delay(13)
+            if pkt_i_fifo.is_empty():
+                idelay = False
+                yield pkt_i_fifo.empty.negedge
 
     @instance
     def p_tx_packets():
+        """ transmit processed packets """
         while True:
-            if not pkt_o_fifo.isempty():
+            if not pkt_o_fifo.is_empty():
                 pkt = pkt_o_fifo.read()
                 bytes = pkt.tobytes()
                 for bb in bytes:
                     tx.frame.next = True
                     tx.data.next = bb
                     yield tx.lclk.posedge
+                # packet complete clear frame
+                tx.frame.next = False
 
-            if pkt_o_fifo.isempty():
+            if pkt_o_fifo.is_empty():
                 yield pkt_o_fifo.empty.negedge
+            else:
+                yield tx.lclk.posedge
 
-    return p_rx_packets, p_proc_packets, p_tx_packets
+    return gclk, p_rx_packets, p_proc_packets, p_tx_packets
