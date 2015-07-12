@@ -119,9 +119,9 @@ class EMesh(object):
         self.rxrd = EMeshPacket()  # RX read, receive external read commands
         self.rxrr = EMeshPacket()  # RX read response, receive read acknowledge
 
-        # transmit and receive FIFOs
+        # transmit and receive FIFOs - simulation only
         # @todo: want these to be private (_) but then a bunch of
-        #        methods need to be added to wait on packet events
+        #        methods need to be added to wait on packet events, etc.
         self.packet_types = ('wr', 'rd', 'rr',)
         self.txwr_fifo = FIFO()
         self.txrd_fifo = FIFO()
