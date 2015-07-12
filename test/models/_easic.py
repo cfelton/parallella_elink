@@ -24,7 +24,6 @@ def elink_asic_model(elink):
 
     pkt_i_fifo = FIFO(depth=128)
     pkt_o_fifo = FIFO(depth=128)
-    pkt_delay = [EMeshPacket() for _ in range(137)]
 
     @instance
     def p_rx_packets():
@@ -44,8 +43,6 @@ def elink_asic_model(elink):
                     bytes = []
                 yield rx.lclk.posedge
             # @todo: if len(bytes) != 13 report error - partial packet
-
-    nslots = len(pkt_delay)
 
     # @todo: simulate EMesh routing
     @instance
@@ -70,6 +67,7 @@ def elink_asic_model(elink):
         while True:
             if not pkt_o_fifo.is_empty():
                 pkt = pkt_o_fifo.read()
+                # @todo: if len of FIFO > 2, scramble
                 bytes = pkt.tobytes()
                 for bb in bytes:
                     tx.frame.next = True
