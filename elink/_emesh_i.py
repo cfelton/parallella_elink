@@ -11,17 +11,23 @@ class EMeshPacket(object):
     """
     @todo: description
     """
+
     def __init__(self, access=0, write=0, datamode=2, ctrlmode=0,
                  dstaddr=0, data=0, srcaddr=0):
         """
 
-        :param access: Indicates a valid transaction
-        :param write: Indicates a write transaction
-        :param datamode: Data size (0=8b, 1=16b, 2=32b, 3=64b)
-        :param ctrlmode: Various special modes for the Epiphany chip
-        :param dstaddr: Address for write, read-request, or read-response
-        :param data: Data for a write transaction, data for read response
-        :param srcaddr: Return addres for read-request upper data for write
+        :param access: Indicates a valid transaction, initial value
+        :param write: Indicates a write transaction, initial value
+        :param datamode: Data size (0=8b, 1=16b, 2=32b, 3=64b), 
+         initial value
+        :param ctrlmode: Various special modes for the Epiphany chip, 
+         initial value
+        :param dstaddr: Address for write, read-request, or 
+         read-response, initial value
+        :param data: Data for a write transaction, data for read 
+         response, initial value
+        :param srcaddr: Return addres for read-request upper data for 
+         write, initial value
         :return:
         """
 
@@ -38,6 +44,10 @@ class EMeshPacket(object):
         self.bits = ConcatSignal(self.srcaddr, self.data, self.dstaddr,
                                  self.ctrlmode, self.datamode, self.write,
                                  self.access)
+
+        # flow control 
+        self.access = Signal(bool(0))
+        self.wait = Signal(bool(0))
 
         # some extra signals used for modeling and testing
         self.finished = Signal(bool(0))
