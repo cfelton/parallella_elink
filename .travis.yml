@@ -2,6 +2,8 @@ language: python
 python:
   - "2.7"
   - "pypy"
+  - "3.4"
+  - "nightly"
   
 # get some stuff to install
 before_install:
@@ -14,6 +16,7 @@ install:
   - ./scripts/ci/install_myhdl.sh
   - pip install coverage
   - pip install coveralls
+  - pip install .
 
 # run the test, nosetests can be used
 script:
@@ -21,4 +24,4 @@ script:
    - python test_elink_interfaces.py
 
 notifications:
-  email: false
+  email: true
