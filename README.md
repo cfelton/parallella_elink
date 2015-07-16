@@ -1,4 +1,6 @@
 
+[![Build Status](https://travis-ci.org/cfelton/parallella_elink.svg)](https://travis-ci.org/cfelton/parallella_elink)
+
 # Parallella Epiphany Link (elink)
 Work In Progress, check back later (01-May-2015) or delete.
 
