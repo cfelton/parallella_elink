@@ -15,5 +15,5 @@ the implementation is flexible enough to be used on any
 FPGA (or ASIC).
 
 **Note**: this core will, more than likely, be moved to 
-the [`mn`repository](http://www.github.com/cfelton/minnesota) in
+the [~~`mn`~~ `rhea` repository](http://www.github.com/cfelton/minnesota) in
 the near future.
