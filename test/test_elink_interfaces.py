@@ -41,6 +41,7 @@ def test_elink_interfaces():
             yield clock.posedge
 
             # send a bunch of write packets
+            print("send packets")
             save_data = []
             yield emesh.write(0xDEEDA5A5, 0xDECAFBAD, 0xC0FFEE)
             save_data.append(0xDECAFBAD)
@@ -53,9 +54,10 @@ def test_elink_interfaces():
             # the other device is a simple loopback, should receive
             # the same packets sent.
             while emesh.txwr_fifo.count > 0:
-                print(emesh)
+                print("  waiting ... {}".format(emesh))
                 yield delay(8000)
 
+            print("get packets looped back, ")
             while len(save_data) > 0:
                 yield delay(8000)
                 pkt = emesh.get_packet('wr')

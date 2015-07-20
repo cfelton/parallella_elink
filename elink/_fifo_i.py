@@ -1,6 +1,8 @@
 
 from __future__ import print_function
 
+from random import shuffle
+
 from myhdl import *
 
 class FIFO(object):
@@ -70,6 +72,9 @@ class FIFO(object):
 
     def is_full(self):
         return len(self._fifo) >= self.depth
+
+    def shuffle(self):
+        self.shuffle(self._fifo)
 
 
 

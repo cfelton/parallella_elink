@@ -45,8 +45,7 @@ class EMeshPacket(object):
                                  self.ctrlmode, self.datamode, self.write,
                                  self.access)
 
-        # flow control 
-        self.access = Signal(bool(0))
+        # flow control ...
         self.wait = Signal(bool(0))
 
         # some extra signals used for modeling and testing
@@ -142,9 +141,9 @@ class EMesh(object):
     def write(self, dstaddr, data, datau=0):
         """ send a write packet
 
-        :param dstaddr:
-        :param data:
-        :param srcaddr:
+        :param dstaddr: destination address for the write
+        :param data: 32bit data for the write
+        :param datau: upper 32bit data for the write (64bit write)
         :return:
 
         not convertible.

@@ -39,6 +39,7 @@ def elink_asic_model(elink):
                     pkt.frombytes(bytes)
                     yield delay(1)
                     pkt_i_fifo.write(pkt)
+                    #print("[easic] RX packet {} {}".format(pkt, pkt_i_fifo))
                     #@todo: if FIFO full assert wait
                     bytes = []
                 yield rx.lclk.posedge
@@ -56,6 +57,7 @@ def elink_asic_model(elink):
                     yield delay(17)
                     idelay = True
                 pkt_o_fifo.write(pkt)
+                #print("[easic] PROC packet {} {}".format(pkt, pkt_o_fifo))
 
             if pkt_i_fifo.is_empty():
                 idelay = False
@@ -67,7 +69,8 @@ def elink_asic_model(elink):
         while True:
             if not pkt_o_fifo.is_empty():
                 pkt = pkt_o_fifo.read()
-                # @todo: if len of FIFO > 2, scramble
+                #print("[easic] TX packet {} {}".format(pkt, pkt_o_fifo))
+                # @todo: if len of FIFO > 2, shuffle order
                 bytes = pkt.tobytes()
                 for bb in bytes:
                     tx.frame.next = True

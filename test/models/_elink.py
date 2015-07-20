@@ -72,6 +72,7 @@ def elink_external_model(elink, emesh):
         while True:
             epkt = EMeshPacket()
             yield elink.receive_packet(epkt)
+            print("[ELINK] {}".format(epkt))
             emesh.route_to_fifo(epkt)
 
     return g_txclk, g_elink, process_tx, process_rx
