@@ -6,6 +6,25 @@ from myhdl import *
 
 from ._fifo_i import FIFO
 
+def epkt_from_bits(epkt, bits):
+    """ Map a bit-vector to an EMeshPacket interface
+    :param epkt: EMeshPacket interface
+    :param bits: bit-vector (myhdl.intbv)
+    :return: myhdl generators
+
+    Convertible
+    """
+    @always_comb
+    def rtl_assign():
+        epkt.access.next = bits[1:0]
+        epkt.write.next = bits[2:1]
+        epkt.datamode.next = bits[4:2]
+        epkt.ctrlmode.next = bits[8:4]
+        epkt.dstaddr.next = bits[40:8]
+        epkt.data.next = bits[72:40]
+        epkt.srcaddr.next = bits[104:72]
+    return rtl_assign
+
 
 class EMeshPacket(object):
     """

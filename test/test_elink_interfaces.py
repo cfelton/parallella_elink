@@ -24,8 +24,8 @@ def test_elink_interfaces():
     """
     clock = Signal(bool(0))
     # create the interfaces
-    elink = ELink()      # links the two components (models)
-    emesh = EMesh(clock) # interface into the Elink external component
+    elink = ELink()       # links the two components (models)
+    emesh = EMesh(clock)  # interface into the Elink external component
 
     @always(delay(2500))
     def tbclk():
