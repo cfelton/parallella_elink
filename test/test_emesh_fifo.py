@@ -6,7 +6,8 @@ import os
 from copy import deepcopy
 
 import myhdl
-from myhdl import (Signal, ResetSignal, always, instance, delay,
+from myhdl import (Signal, ResetSignal, intbv, modbv,
+                   always, always_comb, instance, delay,
                    traceSignals, Simulation,)
 
 from elink import EMesh
@@ -15,8 +16,6 @@ from elink import emesh_fifo
 
 def test_emesh_fifo():
     """
-
-    :return:
     """
 
     clock_a, clock_b = Signal(bool(0)), Signal(bool(0))
@@ -28,41 +27,67 @@ def test_emesh_fifo():
     def tbclka():
         clock_a.next = not clock_a
 
-    @always(delay(3000))
+    @always(delay(1300))
     def tbclkb():
         clock_b.next = not clock_b
 
-    @always(clock_b.posedge)
-    def tbmon():
-        if emesh_b.txwr.access or emesh_b.txrd.access or emesh_b.txrr.access\
-                :
-            output_data.append(deepcopy(emesh_b))
-
     def _test_stim():
-        print("get emesh_fifo")
         tbdut = emesh_fifo(reset, emesh_a, emesh_b)
 
         @instance
         def tbstim():
-            print("start stim")
             yield delay(1111)
-            yield clock_a.posedge
+            for _ in range(5):
+                yield clock_a.posedge
 
+            # push a single packet and verify receipt on the other side
             yield emesh_a.write(0xDEEDA5A5, 0xDECAFBAD, 0xC0FFEE)
-            input_data.append(deepcopy(emesh_a))
-            yield emesh_b.access
+            #input_data.append(deepcopy(emesh_a))
+            #yield emesh_b.txwr.access
             print("  fifo ouput emesh {}".format(emesh_b))
 
-            yield(10000)
+            for _ in range(10):
+                yield clock_b.posedge
+
             raise myhdl.StopSimulation
 
-        return tbclka, tbclkb, tbmon, tbdut
+        @always(clock_b.posedge)
+        def tbcap():
+            if emesh_b.txwr.access or emesh_b.txrd.access or emesh_b.txrr.access:
+                print("output packet: {}".format(emesh_b))
+                #output_data.append(deepcopy(emesh_b))
 
-    print("start simulation")
+            if emesh_a.txwr.access or emesh_a.txwr.data != 0:
+                print("{}".format(emesh_a))
+
+        # monitor an emesh (interface tracing limitations)
+        emesh_a_access = Signal(bool(0))
+        emesh_a_data = Signal(intbv(0)[32:0])
+
+        emesh_b_access = Signal(bool(0))
+        emesh_b_data = Signal(intbv(0)[32:0])
+
+        cm = Signal(modbv(0)[8:])
+
+        @always(emesh_b.clock.posedge)
+        def tbmon():
+            cm.next = cm + 1
+
+            emesh_a_access.next = emesh_a.txwr.access
+            emesh_a_data.next = emesh_a.txwr.data
+
+            emesh_b_access.next = emesh_b.txwr.access
+            emesh_b_data.next = emesh_b.txwr.data
 
 
-    Simulation(traceSignals(_test_stim)).run()
-    #Simulation(_test_stim()).run()
+        return tbclka, tbclkb, tbcap, tbmon, tbdut, tbstim
+
+    traceSignals.timescale = '1ps'
+    traceSignals.name = 'vcd/_test_emesh_fifo'
+    if os.path.isfile(traceSignals.name+'.vcd'):
+        os.remove(traceSignals.name+'.vcd')
+    g = traceSignals(_test_stim)
+    Simulation(g).run()
     #myhdl.toVerilog()
 
 

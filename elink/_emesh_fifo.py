@@ -8,12 +8,15 @@ from myhdl import *
 from rhea import cores
 from rhea.system import FIFOBus
 
+from . import EMeshPacket
 from . import epkt_from_bits
 
 
 def emesh_fifo(reset, emesh_i, emesh_o):
     """ EMesh transmit FIFO
     """
+
+    # @todo: add rx channels ...
 
     nbits = len(emesh_i.txwr.bits)
     fbus_wr, fbus_rd, fbus_rr = [FIFOBus(size=16, width=nbits)
@@ -23,7 +26,7 @@ def emesh_fifo(reset, emesh_i, emesh_o):
         """ assign the EMesh inputs to the FIFO bus """
         @always_comb
         def rtl_assign():
-            fbus.wdata = epkt.bits
+            fbus.wdata.next = epkt.bits
             print(epkt)
             if epkt.access:
                 #fbus.write.next = True
@@ -33,11 +36,12 @@ def emesh_fifo(reset, emesh_i, emesh_o):
                 fbus.wr.next = False
         return rtl_assign
 
-    def fifo_to_emesh(fbus, epkt):
+    def fifo_to_emesh(fbus, epkt, clock):
         """ assign FIFO bus to emesh output """
+        fpkt = EMeshPacket()
 
         # map the bit-vector to the EMeshPacket interface
-        map_inst = epkt_from_bits(epkt, fbus.rdata)
+        map_inst = epkt_from_bits(fpkt, fbus.rdata)
 
         # the FIFOs work with a read acknowledge vs. a read
         # request - meaning the data is available before the
@@ -57,7 +61,23 @@ def emesh_fifo(reset, emesh_i, emesh_o):
                 #fbus.read.next = False
                 fbus.rd.next = False
 
-        return map_inst, rtl_read
+        @always(clock.posedge)
+        def rtl_assign():
+            # @todo: check and see if this will convert fine
+            # @todo: epkt.assign(fpkt)
+            if fbus.rvld:
+                print("YES READ VALID {} {} {}".format(fbus.rdata, fpkt, epkt))
+                epkt.access.next = fpkt.access
+                epkt.write.next = fpkt.write
+                epkt.datamode.next = fpkt.datamode
+                epkt.ctrlmode.next = fpkt.ctrlmode
+                epkt.dstaddr.next = fpkt.dstaddr
+                epkt.data.next = fpkt.data
+                epkt.srcaddr.next = fpkt.srcaddr
+            else:
+                epkt.access.next = False
+
+        return map_inst, rtl_read, rtl_assign
 
     # create a FIFO foreach channel: write, read, read-response
     fifo_insts = []
@@ -70,7 +90,7 @@ def emesh_fifo(reset, emesh_i, emesh_o):
     # assign the output of the FIFO
     for epkt, fifobus in zip((emesh_o.txwr, emesh_o.txrd, emesh_o.txrr,),
                              (fbus_wr, fbus_rd, fbus_rr,)):
-        fifo_insts += [fifo_to_emesh(fifobus, epkt)]
+        fifo_insts += [fifo_to_emesh(fifobus, epkt, emesh_o.clock)]
 
     return fifo_insts
 

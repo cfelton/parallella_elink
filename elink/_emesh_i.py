@@ -27,10 +27,6 @@ def epkt_from_bits(epkt, bits):
 
 
 class EMeshPacket(object):
-    """
-    @todo: description
-    """
-
     def __init__(self, access=0, write=0, datamode=2, ctrlmode=0,
                  dstaddr=0, data=0, srcaddr=0):
         """
@@ -119,14 +115,13 @@ class EMeshPacket(object):
 
 
 class EMesh(object):
-    """
-    The EMesh interface on the external ELinks is defined as having
-    three EMeshPacket conduits.  These conduits are used to send
-    write and read requests over the Elink.
-
-
-    """
     def __init__(self, clock):
+        """
+        The EMesh interface on the external ELinks is defined as having
+        three EMeshPacket conduits.  These conduits are used to send
+        write and read requests over the Elink.
+
+        """
 
         self.clock = clock         # the interface clock
         self.txwr = EMeshPacket()  # TX write, send write commands
@@ -139,7 +134,7 @@ class EMesh(object):
 
         # transmit and receive FIFOs - simulation only
         # @todo: want these to be private (_) but then a bunch of
-        #        methods need to be added to wait on packet events, etc.
+        # @todo: methods need to be added to wait on packet events, etc.
         self.packet_types = ('wr', 'rd', 'rr',)
         self.txwr_fifo = FIFO()
         self.txrd_fifo = FIFO()
@@ -165,14 +160,22 @@ class EMesh(object):
         :param datau: upper 32bit data for the write (64bit write)
         :return:
 
+        @todo: add explaination why a separate packet is used to push
+        @todo: onto the transaction FIFOs (needs copies on the FIFOs
+        @todo: and not actual bus interface).
+
         not convertible.
         """
-        # get a new packet
+        # get a new packet for the transaction emulation
         pkt = EMeshPacket(access=True, write=True,
                           dstaddr=dstaddr, data=data, srcaddr=datau)
         # push the packet onto the TX write FIFO
+        # also assign the txwr packet to the new packet, the txwr
+        # will mirror the transaction packet
+        self.txwr.assign(pkt)
         self.txwr_fifo.write(pkt)
         yield self.clock.posedge
+        self.txwr.clear()
 
     def read(self, dstaddr, data, srcaddr):
         """ send a read packet
@@ -221,6 +224,10 @@ class EMesh(object):
             pass
 
     def get_packet(self, pkt_type):
+        """ Get a packet from one of the channels
+        :param pkt_type:
+        :return:
+        """
         assert pkt_type in self.packet_types
         pkt = None
         if pkt_type == 'wr':
