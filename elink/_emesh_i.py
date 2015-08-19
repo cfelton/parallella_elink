@@ -2,7 +2,8 @@
 from __future__ import division
 from __future__ import print_function
 
-from myhdl import *
+from myhdl import (Signal, SignalType, intbv, ConcatSignal,
+                   always_comb, concat)
 
 from ._fifo_i import FIFO
 
@@ -112,6 +113,33 @@ class EMeshPacket(object):
         self.dstaddr.next = pkt.dstaddr
         self.data.next = pkt.data
         self.srcaddr.next = pkt.srcaddr
+
+
+class EMeshPacketSnapshot(object):
+    def __init__(self, epkt=None):
+        """ Snapshot of an EMeshPacket interface
+        This object is used to capture a snapshot, values only,
+        of a EMeshPacket at a particular point in time
+        """
+        if epkt is not None:
+            for k, v in epkt.__dict__.items():
+                if isinstance(v, SignalType):
+                    self.__dict__[k] = int(v)
+
+    def update(self, epkt):
+        if epkt is not None:
+            for k, v in epkt.__dict__.items():
+                if isinstance(v, SignalType):
+                    self.__dict__[k] = int(v)
+
+    def __eq__(self, other):
+        assert isinstance(other, EMeshPacketSnapshot)
+        mismatch = False
+        for k, v in self.__dict__.items():
+            if v != other.__dict__[k]:
+                mismatch = True
+        return not mismatch
+
 
 
 class EMesh(object):
@@ -238,5 +266,20 @@ class EMesh(object):
             pkt = self.rxrr_fifo.read()
 
         return pkt
+
+
+class EMeshSnapshot(object):
+    def __init__(self, emesh):
+        for k, v in emesh.__dict__.items():
+            if isinstance(v, EMeshPacket):
+                self.__dict__[k] = EMeshPacketSnapshot(v)
+
+    def __eq__(self, other):
+        assert isinstance(other, EMeshSnapshot)
+        mismatch = False
+        for k, v in self.__dict__.items():
+            if v != other.__dict__[k]:
+                mismatch = True
+        return not mismatch
 
 

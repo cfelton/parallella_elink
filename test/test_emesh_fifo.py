@@ -11,6 +11,7 @@ from myhdl import (Signal, ResetSignal, intbv, modbv,
                    traceSignals, Simulation,)
 
 from elink import EMesh
+from elink import EMeshSnapshot
 from elink import emesh_fifo
 
 
@@ -42,12 +43,13 @@ def test_emesh_fifo():
 
             # push a single packet and verify receipt on the other side
             yield emesh_a.write(0xDEEDA5A5, 0xDECAFBAD, 0xC0FFEE)
-            #input_data.append(deepcopy(emesh_a))
-            #yield emesh_b.txwr.access
-            print("  fifo ouput emesh {}".format(emesh_b))
+            input_data.append(EMeshSnapshot(emesh_a))
 
             for _ in range(10):
                 yield clock_b.posedge
+
+            assert len(output_data) == 1
+            assert output_data[0] == input_data[0]
 
             raise myhdl.StopSimulation
 
@@ -55,7 +57,7 @@ def test_emesh_fifo():
         def tbcap():
             if emesh_b.txwr.access or emesh_b.txrd.access or emesh_b.txrr.access:
                 print("output packet: {}".format(emesh_b))
-                #output_data.append(deepcopy(emesh_b))
+                output_data.append(EMeshSnapshot(emesh_b))
 
             if emesh_a.txwr.access or emesh_a.txwr.data != 0:
                 print("{}".format(emesh_a))
@@ -78,7 +80,6 @@ def test_emesh_fifo():
 
             emesh_b_access.next = emesh_b.txwr.access
             emesh_b_data.next = emesh_b.txwr.data
-
 
         return tbclka, tbclkb, tbcap, tbmon, tbdut, tbstim
 
