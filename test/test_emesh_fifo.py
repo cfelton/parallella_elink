@@ -3,7 +3,6 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-from copy import deepcopy
 
 import myhdl
 from myhdl import (Signal, ResetSignal, intbv, modbv,

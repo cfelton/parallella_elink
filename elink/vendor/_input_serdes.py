@@ -3,7 +3,7 @@ from myhdl import Signal, intbv, concat, always
 from . import SERDESInterface
 
 
-def input_serdes(serdes_intf):
+def device_input_serdes(serdes_intf):
     """
     """
     assert isinstance(serdes_intf, SERDESInterface)
@@ -42,5 +42,9 @@ def input_serdes(serdes_intf):
     return mods
 
 
-def device_input_serdes(pll_intf_list):
+def device_input_serdes_bank(pll_intf_list):
     assert isinstance(pll_intf_list, (list, tuple,))
+
+    mods = []
+    for intf in pll_intf_list:
+        mods += device_input_serdes(intf)
