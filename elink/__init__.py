@@ -9,6 +9,7 @@ from ._elink_i import ELink
 # modules
 from ._emesh_i import epkt_from_bits
 from ._emesh_fifo import emesh_fifo
+from ._io_serdes import io_serdes
 
 # @todo: move this to support/models, test function only
 from ._fifo_i import FIFO

@@ -34,7 +34,7 @@ def emesh_fifo(reset, emesh_i, emesh_o):
             else:
                 #fbus.write.next = False
                 fbus.wr.next = False
-        return rtl_assign
+        return rtl_assign,
 
     def fifo_to_emesh(fbus, epkt, clock):
         """ assign FIFO bus to emesh output """
@@ -83,14 +83,14 @@ def emesh_fifo(reset, emesh_i, emesh_o):
     fifo_insts = []
     for epkt, fifobus in zip((emesh_i.txwr, emesh_i.txrd, emesh_i.txrr,),
                              (fbus_wr, fbus_rd, fbus_rr,)):
-        fifo_insts += [emesh_to_fifo(epkt, fifobus)]
-        fifo_insts += [cores.fifo.fifo_async(reset, emesh_i.clock,
-                                             emesh_o.clock, fifobus)]
+        fifo_insts += emesh_to_fifo(epkt, fifobus)
+        fifo_insts += cores.fifo.fifo_async(reset, emesh_i.clock,
+                                            emesh_o.clock, fifobus)
 
     # assign the output of the FIFO
     for epkt, fifobus in zip((emesh_o.txwr, emesh_o.txrd, emesh_o.txrr,),
                              (fbus_wr, fbus_rd, fbus_rr,)):
-        fifo_insts += [fifo_to_emesh(fifobus, epkt, emesh_o.clock)]
+        fifo_insts += fifo_to_emesh(fifobus, epkt, emesh_o.clock)
 
     return fifo_insts
 
