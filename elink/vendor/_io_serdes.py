@@ -20,6 +20,5 @@ def io_serdes(serial_in_p, serial_in_n,
     """
     mod_insts = []
 
-
     return mod_insts
 
