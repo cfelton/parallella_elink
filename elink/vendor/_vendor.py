@@ -8,7 +8,7 @@ class Vendor(object):
     def vendor(self):
         return self._vendor
 
-    @property.setter
+    @vendor.setter
     def vendor(self, v):
         assert v.lower() in ('altera', 'lattice', 'xilinx')
         self._vendor = v.lower()

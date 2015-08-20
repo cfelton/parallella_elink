@@ -1,13 +1,16 @@
 
 
+import myhdl
 from myhdl import Signal, ResetSignal, intbv
 
-from .vendor import SERDESInterface
-from .vendor import output_diff_buffer
-from .vendor import input_diff_buffer
-from .vendor import input_serdes
-from .vendor import input_serdes_bank
-from .vendor import output_serdes_bank
+# @todo: all vendor primitives and interfaces will move to rhea
+from elink.vendor import SERDESInterface
+from elink.vendor import output_diff_buffer
+from elink.vendor import input_diff_buffer
+from elink.vendor import input_serdes
+from elink.vendor import input_serdes_bank
+from elink.vendor import output_serdes_bank
+
 
 def elink_io_top(
     clock_ext, reset_ext,
@@ -84,3 +87,11 @@ elink_io_top.port_map = {
     'pb_pins': Signal(intbv(0)[4:]),
     'sw_pins': Signal(intbv(0)[4:])
 }
+
+
+def convert():
+    myhdl.toVerilog(elink_io_top, **elink_io_top.port_map)
+
+
+if __name__ == '__main__':
+    convert()

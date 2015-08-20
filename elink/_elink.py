@@ -6,7 +6,7 @@ from myhdl import *
 
 from . import EMeshPacket
 from . import FIFO
-from . import io_serdes
+#from . import io_serdes
 
 def elink(elink_intf, emesh_intf):
     """ The Adapteva ELink interface
@@ -34,6 +34,6 @@ def elink(elink_intf, emesh_intf):
     #mod_inst += ecfg_fifo(emesh, emesh_e)
 
     # Vendor specific IO SERDES
-    mod_inst += io_serdes()
+    #mod_inst += io_serdes()
 
     return mod_inst
