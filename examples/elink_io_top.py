@@ -61,10 +61,14 @@ def elink_io_top(
     seri = [Signal(bool(0)) for _ in range(num_channels)]
     sero = [Signal(bool(0)) for _ in range(num_channels)]
 
-    mods += output_diff_buffer(sero, serial_dat_out_p, serial_dat_out_n)
-    mods += input_diff_buffer(serial_dat_in_p, serial_dat_in_n, seri)
+    # get the device specific differential buffers
+    #mods += output_diff_buffer(sero, serial_dat_out_p, serial_dat_out_n)
+    #mods += input_diff_buffer(serial_dat_in_p, serial_dat_in_n, seri)
 
-    return mods
+    g1 = output_diff_buffer(sero, serial_dat_out_p, serial_dat_out_n)
+    g2 = input_diff_buffer(serial_dat_in_p, serial_dat_in_n, seri)
+    #g = tuple(mods)
+    return g1, g2, #mods
 
 
 # Default port-map for the top-level
@@ -90,6 +94,7 @@ elink_io_top.port_map = {
 
 
 def convert():
+    myhdl.dump_hierarchy(elink_io_top, **elink_io_top.port_map)
     myhdl.toVerilog(elink_io_top, **elink_io_top.port_map)
 
 
